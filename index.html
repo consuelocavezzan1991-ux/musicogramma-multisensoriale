@@ -4,18 +4,17 @@
     <meta charset="UTF-8" />
     <title>Musicogramma interattivo</title>
 
-    <!-- Carico p5.js e p5.sound da CDN -->
+    <!-- Carico p5.js e p5.sound -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.sound.min.js"></script>
 
-    <!-- Il nostro sketch -->
-    <script src="sketch.js" defer></script>
+    <!-- Collegamento al file sketch.js nella cartella sketch -->
+    <script src="../sketch/sketch.js" defer></script>
 
     <style>
       body {
         margin: 0;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-          sans-serif;
+        font-family: system-ui, sans-serif;
         background: #f5f5f5;
         color: #111;
         text-align: center;
@@ -103,8 +102,7 @@
     </div>
 
     <div id="canvas-container">
-      <!-- qui p5 disegnerà il canvas -->
+      <!-- Qui p5.js disegnerà il canvas -->
     </div>
   </body>
 </html>
-
