@@ -6,6 +6,7 @@ let amplitude;
 let ready = false;
 
 function preload() {
+  // I NOMI devono coincidere con i file nel repo
   danzaAudio = loadSound("danza.mp3");
   sarabandaAudio = loadSound("sarabanda.mp3");
 }
@@ -13,10 +14,11 @@ function preload() {
 function setup() {
   const canvas = createCanvas(800, 400);
   canvas.parent("canvas-container");
-  noFill();
+
   fft = new p5.FFT();
   amplitude = new p5.Amplitude();
 
+  // Collego i pulsanti
   document.getElementById("btn-danza").addEventListener("click", () => selectTrack("danza"));
   document.getElementById("btn-sarabanda").addEventListener("click", () => selectTrack("sarabanda"));
   document.getElementById("btn-play").addEventListener("click", playTrack);
@@ -30,9 +32,11 @@ function draw() {
   if (!ready) return;
   background(245);
 
+  // Se non ho ancora scelto o il brano è fermo, mostro un messaggio
   if (!currentTrack || !currentTrack.isPlaying()) {
     fill(100);
     textAlign(CENTER, CENTER);
+    textSize(20);
     text("Seleziona un brano e premi Play", width / 2, height / 2);
     return;
   }
@@ -42,14 +46,13 @@ function draw() {
   let level = amplitude.getLevel();
   let wave = fft.waveform();
 
-  // Disegno dinamico (zigzag + onde colorate)
+  // ONDA che si muove a tempo
   noFill();
   strokeWeight(2);
-
   if (currentName === "Danza delle ore") {
-    stroke(0, 150, 255);
+    stroke(0, 150, 255);      // blu per Danza
   } else {
-    stroke(255, 100, 150);
+    stroke(255, 100, 150);    // rosa per Sarabanda
   }
 
   beginShape();
@@ -60,47 +63,67 @@ function draw() {
   }
   endShape();
 
-  // cerchi pulsanti a ritmo
+  // CERCHIO che pulsa col volume
   let size = map(level, 0, 0.3, 50, 250);
   noStroke();
-  fill(currentName === "Danza delle ore" ? color(0, 120, 255, 150) : color(255, 100, 180, 150));
+  fill(
+    currentName === "Danza delle ore"
+      ? color(0, 120, 255, 150)
+      : color(255, 100, 180, 150)
+  );
   ellipse(width / 2, height / 2, size);
 
+  // Titolo
   fill(0);
-  textSize(20);
-  text(currentName, width / 2, 30);
+  textAlign(CENTER, TOP);
+  textSize(22);
+  text(currentName, width / 2, 20);
 }
 
 function selectTrack(name) {
   stopTrack();
+
   if (name === "danza") {
     currentTrack = danzaAudio;
     currentName = "Danza delle ore";
-  } else {
+  } else if (name === "sarabanda") {
     currentTrack = sarabandaAudio;
     currentName = "Sarabanda";
   }
-  setStatus(`Brano selezionato: ${currentName}. Premi Play.`);
+
+  setStatus(`Brano selezionato: ${currentName}. Premi "Play".`);
 }
 
 function playTrack() {
-  if (!currentTrack) return;
-  if (!currentTrack.isPlaying()) {
-    currentTrack.play();
-    fft.setInput(currentTrack);
-    amplitude.setInput(currentTrack);
-    setStatus(`Riproduzione di: ${currentName}`);
+  if (!currentTrack) {
+    setStatus("Seleziona prima un brano.");
+    return;
   }
+
+  // Sblocca l’audio con il click dell’utente (necessario per Chrome/Edge ecc.)
+  userStartAudio().then(() => {
+    if (!currentTrack.isPlaying()) {
+      currentTrack.play();
+      fft.setInput(currentTrack);
+      amplitude.setInput(currentTrack);
+      setStatus(`Riproduzione di: ${currentName}`);
+    }
+  });
 }
 
 function stopTrack() {
-  if (danzaAudio && danzaAudio.isPlaying()) danzaAudio.stop();
-  if (sarabandaAudio && sarabandaAudio.isPlaying()) sarabandaAudio.stop();
+  if (danzaAudio && danzaAudio.isPlaying()) {
+    danzaAudio.stop();
+  }
+  if (sarabandaAudio && sarabandaAudio.isPlaying()) {
+    sarabandaAudio.stop();
+  }
   setStatus("Riproduzione interrotta.");
 }
 
 function setStatus(msg) {
-  document.getElementById("status").textContent = msg;
+  const el = document.getElementById("status");
+  if (el) el.textContent = msg;
 }
 
 
