@@ -4,79 +4,107 @@
     <meta charset="UTF-8" />
     <title>Musicogramma interattivo</title>
 
-    <!-- Librerie p5.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/addons/p5.sound.min.js"></script>
+    <!-- Carico p5.js e p5.sound da CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.sound.min.js"></script>
+
+    <!-- Il nostro sketch -->
+    <script src="sketch.js" defer></script>
 
     <style>
       body {
         margin: 0;
-        font-family: system-ui, sans-serif;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
         background: #f5f5f5;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-      }
-
-      header {
-        margin-top: 20px;
+        color: #111;
         text-align: center;
       }
 
-      #controls {
-        margin: 15px 0;
+      #ui {
+        padding: 2rem 1rem;
+      }
+
+      h1 {
+        font-size: 2.6rem;
+        margin-bottom: 0.2rem;
+      }
+
+      p.subtitle {
+        margin-top: 0;
+        font-size: 1.1rem;
+        color: #444;
+      }
+
+      .btn-bar {
+        margin: 1.5rem auto;
         display: flex;
-        gap: 10px;
-        flex-wrap: wrap;
+        gap: 1rem;
         justify-content: center;
+        flex-wrap: wrap;
       }
 
       button {
-        padding: 8px 14px;
-        border-radius: 8px;
+        padding: 0.7rem 1.4rem;
+        border-radius: 999px;
         border: none;
+        font-size: 1rem;
         cursor: pointer;
-        font-size: 14px;
+        background: #e0e0e0;
+        transition: background 0.2s, transform 0.1s;
+      }
+
+      button:hover {
+        background: #d4d4d4;
+        transform: translateY(-1px);
       }
 
       button.primary {
-        background-color: #1976d2;
+        background: #1d72f3;
         color: white;
       }
 
-      button.secondary {
-        background-color: #e0e0e0;
+      button.primary:hover {
+        background: #1559ba;
       }
 
-      #info {
-        margin-top: 8px;
-        font-size: 14px;
-        color: #555;
+      button.danger {
+        background: #e74c3c;
+        color: white;
       }
 
-      canvas {
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        margin-bottom: 30px;
+      button.danger:hover {
+        background: #c0392b;
+      }
+
+      #canvas-container {
+        display: flex;
+        justify-content: center;
+        padding-bottom: 2rem;
       }
     </style>
   </head>
-  <body>
-    <header>
-      <h1>Musicogramma interattivo</h1>
-      <p>Visualizzazione semplificata di “Danza delle ore” e “Sarabanda”.</p>
-    </header>
 
-    <div id="controls">
-      <button id="btnDanza" class="secondary">Danza delle ore</button>
-      <button id="btnSarabanda" class="secondary">Sarabanda</button>
-      <button id="btnPlayPause" class="primary">Play</button>
-      <button id="btnStop" class="secondary">Stop</button>
+  <body>
+    <div id="ui">
+      <h1>Musicogramma interattivo</h1>
+      <p class="subtitle">
+        Visualizzazione semplificata di “Danza delle ore” e “Sarabanda”.
+      </p>
+
+      <div class="btn-bar">
+        <button id="btn-danza">Danza delle ore</button>
+        <button id="btn-sarabanda">Sarabanda</button>
+        <button id="btn-play" class="primary">Play</button>
+        <button id="btn-stop" class="danger">Stop</button>
+      </div>
+
+      <p id="status">Seleziona un brano e premi "Play".</p>
     </div>
 
-    <div id="info"></div>
-
-    <!-- p5 sketch -->
-    <script src="sketch.js"></script>
+    <div id="canvas-container">
+      <!-- qui p5 disegnerà il canvas -->
+    </div>
   </body>
 </html>
+
