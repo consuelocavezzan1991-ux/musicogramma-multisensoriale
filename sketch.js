@@ -6,8 +6,8 @@ let animOffset = 0;
 let ready = false;
 
 function preload() {
-  danzaAudio = loadSound("assets/danza.mp3");
-  sarabandaAudio = loadSound("assets/sarabanda.mp3");
+  danzaAudio = loadSound("danza.mp3");
+  sarabandaAudio = loadSound("sarabanda.mp3");
 }
 
 function setup() {
@@ -220,5 +220,6 @@ let sarabandaTimeline = [
   { time: 36, type: "pill", x: 160, y: 630, col: "pink" },
   { time: 37, type: "pill", x: 740, y: 630, col: "violet" }
 ];
+
 
 
