@@ -4,6 +4,7 @@ let currentName = "";
 let ampAnalyzer;
 let animOffset = 0;
 let ready = false;
+let audioOffset = 0.8; // compensazione per il silenzio iniziale
 
 function preload() {
   danzaAudio = loadSound("danza.mp3");
@@ -28,16 +29,10 @@ function draw() {
   if (!ready) return;
   background(245);
 
-  if (!currentTrack) {
-    fill(0);
-    textAlign(CENTER, CENTER);
-    textSize(22);
-    text("Seleziona un brano e premi Play", width / 2, height / 2);
-    return;
-  }
+  if (!currentTrack) return;
 
   animOffset = currentTrack.isPlaying() ? map(ampAnalyzer.getLevel(), 0, 0.3, 0, 25) : 0;
-  let t = currentTrack.currentTime();
+  let t = currentTrack.currentTime() - audioOffset;
 
   let timeline = currentName === "Danza delle ore" ? danzaTimeline : sarabandaTimeline;
   for (let ev of timeline) {
@@ -90,7 +85,7 @@ function setStatus(msg) {
 }
 
 // ---------------------------------------------------------------------------
-// 🎨 Funzioni di disegno
+// 🎨 Disegno forme
 // ---------------------------------------------------------------------------
 
 function drawEvent(ev) {
@@ -166,7 +161,7 @@ function drawDot(x, y, d, col) {
 }
 
 // ---------------------------------------------------------------------------
-// 🕒 Timeline "Danza delle ore" – sincronizzata con il video
+// 🕒 Timeline "Danza delle ore"
 // ---------------------------------------------------------------------------
 
 let danzaTimeline = [
@@ -174,22 +169,18 @@ let danzaTimeline = [
   { time: 3.0, type: "zigzag", x: 230, y: 120, col: "red" },
   { time: 4.0, type: "zigzag", x: 380, y: 120, col: "red" },
   { time: 5.0, type: "zigzag", x: 530, y: 120, col: "red" },
-
   { time: 6.5, type: "smile", x: 155, y: 230, col: "orange" },
   { time: 7.5, type: "smile", x: 305, y: 230, col: "orange" },
   { time: 8.5, type: "smile", x: 455, y: 230, col: "orange" },
-
   { time: 9.5, type: "swirl", x: 770, y: 220, col: "green" },
-
   { time: 10.5, type: "wave", x: 80, y: 370, col: "blue" },
   { time: 12.0, type: "wave", x: 80, y: 430, col: "blue" },
-
   { time: 14.0, type: "zigzag", x: 140, y: 530, col: "red" },
   { time: 15.0, type: "wave", x: 140, y: 570, col: "blue" }
 ];
 
 // ---------------------------------------------------------------------------
-// 🕒 Timeline "Sarabanda" – da completare se vuoi
+// 🕒 Timeline "Sarabanda"
 // ---------------------------------------------------------------------------
 
 let sarabandaTimeline = [
@@ -199,5 +190,30 @@ let sarabandaTimeline = [
   { time: 6, type: "pill", x: 160, y: 185, col: "orange" },
   { time: 7, type: "pill", x: 740, y: 185, col: "orange" },
   { time: 8, type: "dot", x: 450, y: 185, col: "orange" },
-  { time: 10, type: "pill", x: 160,
+  { time: 10, type: "pill", x: 160, y: 240, col: "yellow" },
+  { time: 11, type: "pill", x: 740, y: 240, col: "yellow" },
+  { time: 12, type: "dot", x: 450, y: 240, col: "yellow" },
+  { time: 14, type: "pill", x: 160, y: 295, col: "green" },
+  { time: 15, type: "pill", x: 740, y: 295, col: "green" },
+  { time: 16, type: "dot", x: 450, y: 295, col: "green" },
+  { time: 18, type: "pill", x: 160, y: 350, col: "cyan" },
+  { time: 19, type: "pill", x: 740, y: 350, col: "cyan" },
+  { time: 20, type: "dot", x: 450, y: 350, col: "cyan" },
+  { time: 22, type: "pill", x: 160, y: 405, col: "blue" },
+  { time: 23, type: "pill", x: 740, y: 405, col: "blue" },
+  { time: 24, type: "dot", x: 450, y: 405, col: "blue" },
+  { time: 26, type: "pill", x: 160, y: 460, col: "pink" },
+  { time: 27, type: "pill", x: 740, y: 460, col: "violet" },
+  { time: 28, type: "zigzag", x: 80, y: 530, col: "red" },
+  { time: 29, type: "zigzag", x: 140, y: 500, col: "orange" },
+  { time: 30, type: "zigzag", x: 200, y: 530, col: "green" },
+  { time: 31, type: "zigzag", x: 260, y: 500, col: "green" },
+  { time: 32, type: "pill", x: 600, y: 520, col: "cyan" },
+  { time: 33, type: "dot", x: 540, y: 580, col: "blue" },
+  { time: 34, type: "dot", x: 590, y: 580, col: "blue" },
+  { time: 35, type: "dot", x: 640, y: 580, col: "blue" },
+  { time: 36, type: "pill", x: 160, y: 630, col: "pink" },
+  { time: 37, type: "pill", x: 740, y: 630, col: "violet" }
+];
+
 
