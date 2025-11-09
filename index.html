@@ -1,54 +1,30 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <title>Musicogramma multisensoriale</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      background-color: #f0f0f0;
-      text-align: center;
-      margin: 0;
-      padding: 20px;
-    }
-    #controls {
-      margin-bottom: 20px;
-    }
-    button {
-      margin: 5px;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    #status {
-      margin-top: 10px;
-      font-weight: bold;
-      color: #333;
-    }
-    #canvas-container {
-      display: flex;
-      justify-content: center;
-    }
-  </style>
+  <meta charset="UTF-8">
+  <title>Musicogramma Interattivo</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.sound.min.js"></script>
 </head>
 <body>
-  <h1>Musicogramma multisensoriale</h1>
+  <h1>Musicogramma Interattivo</h1>
+  <p>Seleziona un brano e osserva le forme che si muovono a ritmo di musica 🎵</p>
 
   <div id="controls">
     <button id="btn-danza">Danza delle ore</button>
     <button id="btn-sarabanda">Sarabanda</button>
     <button id="btn-play">Play</button>
     <button id="btn-stop">Stop</button>
-    <div id="status">Caricamento...</div>
   </div>
 
   <div id="canvas-container"></div>
+  <p id="status">Pronto.</p>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/addons/p5.sound.min.js"></script>
   <script src="sketch.js"></script>
 </body>
 </html>
+
 
 
 
