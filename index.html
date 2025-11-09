@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Musicogramma interattivo</title>
+
+    <!-- Librerie p5.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/addons/p5.sound.min.js"></script>
+
+    <style>
+      body {
+        margin: 0;
+        font-family: system-ui, sans-serif;
+        background: #f5f5f5;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      header {
+        margin-top: 20px;
+        text-align: center;
+      }
+
+      #controls {
+        margin: 15px 0;
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      button {
+        padding: 8px 14px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      button.primary {
+        background-color: #1976d2;
+        color: white;
+      }
+
+      button.secondary {
+        background-color: #e0e0e0;
+      }
+
+      #info {
+        margin-top: 8px;
+        font-size: 14px;
+        color: #555;
+      }
+
+      canvas {
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Musicogramma interattivo</h1>
+      <p>Visualizzazione semplificata di “Danza delle ore” e “Sarabanda”.</p>
+    </header>
+
+    <div id="controls">
+      <button id="btnDanza" class="secondary">Danza delle ore</button>
+      <button id="btnSarabanda" class="secondary">Sarabanda</button>
+      <button id="btnPlayPause" class="primary">Play</button>
+      <button id="btnStop" class="secondary">Stop</button>
+    </div>
+
+    <div id="info"></div>
+
+    <!-- p5 sketch -->
+    <script src="sketch.js"></script>
+  </body>
+</html>
