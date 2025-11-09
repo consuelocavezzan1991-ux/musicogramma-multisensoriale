@@ -1,16 +1,23 @@
 // ---------------------------------------------------------------------------
-//            Musicogramma multisensoriale – sketch p5.js
+//  MUSICOGRAMMA MULTISENSORIALE - sketch.js
 // ---------------------------------------------------------------------------
 
-// Audio e stato generale
 let danzaAudio;
 let sarabandaAudio;
+
 let currentTrack = null;
 let currentName = "";
 let ready = false;
 
-// Carica i file audio (i nomi devono coincidere con i file nel repo)
+// Offset usato per una leggera animazione quando il brano è in play
+let animOffset = 0;
+
+// ---------------------------------------------------------------------------
+//  Caricamento dei suoni
+// ---------------------------------------------------------------------------
+
 function preload() {
+  // ATTENZIONE: i nomi devono coincidere con i file presenti nel repo
   danzaAudio = loadSound("danza.mp3", () => {
     console.log("Danza caricata");
   });
@@ -19,9 +26,12 @@ function preload() {
   });
 }
 
+// ---------------------------------------------------------------------------
+//  Setup iniziale
+// ---------------------------------------------------------------------------
+
 function setup() {
-  // Canvas abbastanza alto per contenere i musicogrammi
-  const canvas = createCanvas(900, 650);
+  const canvas = createCanvas(900, 750);
   canvas.parent("canvas-container");
 
   background(245);
@@ -51,6 +61,10 @@ function setup() {
   setStatus("Pronto. Seleziona un brano.");
 }
 
+// ---------------------------------------------------------------------------
+//  Loop di disegno
+// ---------------------------------------------------------------------------
+
 function draw() {
   if (!ready) return;
 
@@ -65,6 +79,13 @@ function draw() {
     return;
   }
 
+  // Piccola animazione: se il brano è in play, l'offset oscilla
+  if (currentTrack.isPlaying()) {
+    animOffset = sin(frameCount * 0.06) * 6; // si muove
+  } else {
+    animOffset = 0; // fermo in pausa
+  }
+
   // Disegno il musicogramma stilizzato in base al brano selezionato
   if (currentName === "Danza delle ore") {
     drawDanzaScore();
@@ -76,22 +97,22 @@ function draw() {
   noStroke();
   fill(0);
   textAlign(CENTER, TOP);
-  textSize(26);
+  textSize(32);
   text(currentName, width / 2, 20);
 
   // Stato di riproduzione
-  textSize(14);
+  textSize(16);
   if (currentTrack.isPlaying()) {
     fill(40, 160, 90);
-    text("In riproduzione", width / 2, 55);
+    text("In riproduzione", width / 2, 58);
   } else {
     fill(120);
-    text("Brano in pausa (premi Play per ascoltare)", width / 2, 55);
+    text("Brano in pausa (premi Play per ascoltare)", width / 2, 58);
   }
 }
 
 // ---------------------------------------------------------------------------
-//                   Selezione e controllo dei brani
+//  Selezione e controllo dei brani
 // ---------------------------------------------------------------------------
 
 function selectTrack(name) {
@@ -147,7 +168,7 @@ function drawZigZag(x, y, segW, amp, nSeg, col) {
   let dir = -1;
   for (let i = 0; i <= nSeg; i++) {
     const xx = x + i * segW;
-    const yy = y + dir * amp;
+    const yy = y + dir * amp + animOffset * 0.5; // leggero movimento
     vertex(xx, yy);
     dir *= -1;
   }
@@ -158,7 +179,7 @@ function drawSmile(x, y, r, col) {
   noFill();
   stroke(col);
   strokeWeight(4);
-  arc(x, y, r, r, PI, 0);
+  arc(x, y + animOffset * 0.4, r, r, PI, 0); // si alza/abbassa un po’
 }
 
 function drawSwirl(x, y, scale, col) {
@@ -169,7 +190,7 @@ function drawSwirl(x, y, scale, col) {
   for (let a = PI; a > -0.1; a -= 0.2) {
     const r = scale * (1.2 - a / PI);
     const xx = x + cos(a) * r;
-    const yy = y + sin(a) * r;
+    const yy = y + sin(a) * r + animOffset * 0.4;
     vertex(xx, yy);
   }
   endShape();
@@ -183,7 +204,7 @@ function drawDanzaScore() {
 
   const colStart = 80;
   const colStep = 150;
-  const rowGap = 50;
+  const rowGap = 55;
   const topY = 120;
 
   // 3 righe di zig-zag rossi (4 colonne)
@@ -219,7 +240,7 @@ function drawDanzaScore() {
   let baseY1 = ySmile2 + 80;
   beginShape();
   for (let x = 80; x < width - 80; x += 12) {
-    const y = baseY1 + sin(x * 0.15) * 15;
+    const y = baseY1 + sin(x * 0.15) * (15 + animOffset * 0.4);
     vertex(x, y);
   }
   endShape();
@@ -227,7 +248,7 @@ function drawDanzaScore() {
   let baseY2 = baseY1 + 60;
   beginShape();
   for (let x = 80; x < width - 80; x += 12) {
-    const y = baseY2 + sin(x * 0.15) * 15;
+    const y = baseY2 + sin(x * 0.15) * (15 + animOffset * 0.4);
     vertex(x, y);
   }
   endShape();
@@ -238,7 +259,7 @@ function drawDanzaScore() {
 
   beginShape();
   for (let x = colStart; x < colStart + 120; x += 10) {
-    const y = baseY3 + 40 + sin(x * 0.25) * 8;
+    const y = baseY3 + 40 + sin(x * 0.25) * (8 + animOffset * 0.3);
     vertex(x, y);
   }
   endShape();
@@ -272,56 +293,57 @@ function drawSarabandaScore() {
   const violet = color(140, 80, 255);
   const pink = color(240, 90, 210);
 
-  const leftX = 140;
+  const leftX = 160;
   const midX = width / 2;
-  const rightX = width - 140;
+  const rightX = width - 160;
   const rowStep = 55;
-  const startY = 110;
+  const startY = 130;
   const pillW = 150;
   const pillH = 18;
   const dotD = 26;
 
-  // Riga 1 – rosso
   let y = startY;
-  drawPill(leftX, y, pillW, pillH, red);
-  drawPill(rightX, y, pillW, pillH, red);
-  drawDot(midX, y, dotD, red);
+
+  // Riga 1 – rosso
+  drawPill(leftX, y + animOffset * 0.3, pillW, pillH, red);
+  drawPill(rightX, y + animOffset * 0.3, pillW, pillH, red);
+  drawDot(midX, y + animOffset * 0.4, dotD, red);
 
   // Riga 2 – arancione
   y += rowStep;
-  drawPill(leftX, y, pillW, pillH, orange);
-  drawPill(rightX, y, pillW, pillH, orange);
-  drawDot(midX, y, dotD, orange);
+  drawPill(leftX, y - animOffset * 0.3, pillW, pillH, orange);
+  drawPill(rightX, y - animOffset * 0.3, pillW, pillH, orange);
+  drawDot(midX, y - animOffset * 0.4, dotD, orange);
 
   // Riga 3 – giallo
   y += rowStep;
-  drawPill(leftX, y, pillW, pillH, yellow);
-  drawPill(rightX, y, pillW, pillH, yellow);
-  drawDot(midX, y, dotD, yellow);
+  drawPill(leftX, y + animOffset * 0.3, pillW, pillH, yellow);
+  drawPill(rightX, y + animOffset * 0.3, pillW, pillH, yellow);
+  drawDot(midX, y + animOffset * 0.4, dotD, yellow);
 
   // Riga 4 – verde
   y += rowStep;
-  drawPill(leftX, y, pillW, pillH, green);
-  drawPill(rightX, y, pillW, pillH, green);
-  drawDot(midX, y, dotD, green);
+  drawPill(leftX, y - animOffset * 0.3, pillW, pillH, green);
+  drawPill(rightX, y - animOffset * 0.3, pillW, pillH, green);
+  drawDot(midX, y - animOffset * 0.4, dotD, green);
 
   // Riga 5 – azzurro
   y += rowStep;
-  drawPill(leftX, y, pillW, pillH, cyan);
-  drawPill(rightX, y, pillW, pillH, cyan);
-  drawDot(midX, y, dotD, cyan);
+  drawPill(leftX, y + animOffset * 0.3, pillW, pillH, cyan);
+  drawPill(rightX, y + animOffset * 0.3, pillW, pillH, cyan);
+  drawDot(midX, y + animOffset * 0.4, dotD, cyan);
 
   // Riga 6 – blu
   y += rowStep;
-  drawPill(leftX, y, pillW, pillH, blue);
-  drawPill(rightX, y, pillW, pillH, blue);
-  drawDot(midX, y, dotD, blue);
+  drawPill(leftX, y - animOffset * 0.3, pillW, pillH, blue);
+  drawPill(rightX, y - animOffset * 0.3, pillW, pillH, blue);
+  drawDot(midX, y - animOffset * 0.4, dotD, blue);
 
   // Riga 7 – rosa
   y += rowStep;
-  drawPill(leftX, y, pillW, pillH, pink);
-  drawPill(rightX, y, pillW, pillH, pink);
-  drawDot(midX, y, dotD, pink);
+  drawPill(leftX, y + animOffset * 0.3, pillW, pillH, pink);
+  drawPill(rightX, y + animOffset * 0.3, pillW, pillH, pink);
+  drawDot(midX, y + animOffset * 0.4, dotD, pink);
 
   // Parte bassa: piccola frase finale (zig-zag + pill + tre pallini)
   y += rowStep + 40;
@@ -332,25 +354,24 @@ function drawSarabandaScore() {
 
   stroke(red);
   beginShape();
-  vertex(80, y + 40);
-  vertex(140, y);
+  vertex(80, y + 40 + animOffset * 0.3);
+  vertex(140, y + animOffset * 0.3);
   stroke(orange);
-  vertex(200, y + 40);
+  vertex(200, y + 40 + animOffset * 0.3);
   stroke(green);
-  vertex(260, y);
+  vertex(260, y + animOffset * 0.3);
   endShape();
 
   // pill azzurra a destra
-  drawPill(width / 2 + 140, y + 15, 130, pillH, cyan);
+  drawPill(width / 2 + 150, y + 15 + animOffset * 0.3, 130, pillH, cyan);
 
   // tre pallini blu
-  drawDot(width / 2 + 40, y + 70, dotD, blue);
-  drawDot(width / 2 + 90, y + 70, dotD, blue);
-  drawDot(width / 2 + 140, y + 70, dotD, blue);
+  drawDot(width / 2 + 40, y + 70 + animOffset * 0.3, dotD, blue);
+  drawDot(width / 2 + 90, y + 70 + animOffset * 0.4, dotD, blue);
+  drawDot(width / 2 + 140, y + 70 + animOffset * 0.3, dotD, blue);
 
   // ultima riga in basso (due pill rosa/viola)
   y += rowStep + 40;
-  drawPill(leftX, y, pillW, pillH, pink);
-  drawPill(rightX, y, pillW, pillH, violet);
+  drawPill(leftX, y + animOffset * 0.3, pillW, pillH, pink);
+  drawPill(rightX, y + animOffset * 0.3, pillW, pillH, violet);
 }
-
