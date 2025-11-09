@@ -12,7 +12,7 @@ function preload() {
 }
 
 function setup() {
-  const canvas = createCanvas(800, 400);
+  const canvas = createCanvas(800, 450);
   canvas.parent("canvas-container");
 
   fft = new p5.FFT();
@@ -61,13 +61,17 @@ function draw() {
   textSize(24);
   text(currentName, width / 2, 10);
 
-  // Se non sta suonando, mostra solo il titolo
+  // Messaggio di stato
+  textSize(14);
+  fill(120);
   if (!currentTrack.isPlaying()) {
-    textSize(14);
-    fill(120);
     text("Brano in pausa (premi Play per ascoltare)", width / 2, 40);
-    return;
+  } else {
+    text("Segui le linee con il dito mentre ascolti", width / 2, 40);
   }
+
+  // Se non sta suonando, niente animazione
+  if (!currentTrack.isPlaying()) return;
 
   // Analisi audio
   let spectrum = fft.analyze();
@@ -104,7 +108,6 @@ function playTrack() {
     return;
   }
 
-  // Sblocco audio (richiesto da alcuni browser)
   userStartAudio().then(() => {
     if (!currentTrack.isPlaying()) {
       currentTrack.play();
@@ -126,74 +129,81 @@ function setStatus(msg) {
   if (el) el.textContent = msg;
 }
 
-/* ---------------- VISUAL DANZA DELLE ORE ---------------- */
+/* ---------------- FUNZIONCINE DI DISEGNO ---------------- */
 
 // zig-zag “da seguire col dito”
-function drawZigZagLine(yBase, amp, col, wave) {
+function drawZigZagLine(yBase, amp, col, wave, densita = 10) {
   stroke(col);
   strokeWeight(3);
   noFill();
   beginShape();
-  for (let i = 0; i < wave.length; i += 10) {
-    let x = map(i, 0, wave.length, 0, width);
-    // zig-zag + piccola modulazione con la forma d’onda
-    let z = (i % 40 < 20 ? -1 : 1) * amp;
-    let y = yBase + z + wave[i] * 80;
+  for (let i = 0; i < wave.length; i += densita) {
+    let x = map(i, 0, wave.length, 40, width - 40);
+    // zig-zag regolare + piccola modulazione con la forma d’onda
+    let z = (i % (densita * 4) < (densita * 2) ? -1 : 1) * amp;
+    let y = yBase + z + wave[i] * 40; // meno rumore verticale
     vertex(x, y);
   }
   endShape();
 }
 
-// barre colorate ritmiche
+// barre ritmiche in basso (più basse e separate)
 function drawBeatBars(spectrum, level) {
-  let step = 20;
-  for (let x = 0; x < width; x += step) {
-    let index = floor(map(x, 0, width, 0, spectrum.length - 1));
+  let step = 22;
+  let maxH = 120; // altezza massima barre
+  for (let x = 40; x < width - 40; x += step) {
+    let index = floor(map(x, 40, width - 40, 0, spectrum.length - 1));
     let energy = spectrum[index];
 
-    let h = map(energy, 0, 255, 0, height / 2) + level * 80;
-    let y = height - h;
+    let h = map(energy, 0, 255, 10, maxH) + level * 40;
+    let y = height - 30 - h; // distacco dal bordo basso
 
     // alterno colori vivaci
     let m = (x / step) % 4;
-    if (m === 0) fill(255, 80, 80, 180);      // rosso
-    else if (m === 1) fill(255, 200, 80, 180); // giallo
-    else if (m === 2) fill(80, 200, 120, 180); // verde
-    else fill(80, 160, 255, 180);             // azzurro
+    if (m === 0) fill(255, 80, 80, 200);        // rosso
+    else if (m === 1) fill(255, 200, 80, 200); // giallo
+    else if (m === 2) fill(80, 200, 120, 200); // verde
+    else fill(80, 160, 255, 200);              // azzurro
 
     noStroke();
-    rect(x, y, step - 2, h, 4);
+    rect(x, y, step - 4, h, 4);
   }
 }
+
+/* ---------------- DANZA DELLE ORE ---------------- */
 
 function drawDanzaVisual(spectrum, wave, level) {
   // sfondo leggermente “ballerino”
   let bg = map(level, 0, 0.4, 245, 230);
   background(bg);
 
-  // barre ritmiche in basso
+  // Zona centrale per le linee da seguire col dito
+  let y1 = height * 0.30; // ~135
+  let y2 = height * 0.45; // ~200
+
+  // prima linea zig-zag (più ampia)
+  drawZigZagLine(y1, 25 + level * 50, color(255, 80, 120), wave, 12);
+
+  // seconda linea zig-zag (più calma)
+  drawZigZagLine(y2, 18 + level * 40, color(80, 160, 255), wave, 12);
+
+  // barre ritmiche ben separate in basso
   drawBeatBars(spectrum, level);
 
-  // due righe di zig-zag “danza”
-  let y1 = height * 0.30;
-  let y2 = height * 0.50;
-  drawZigZagLine(y1, 25 + level * 60, color(255, 80, 120), wave);
-  drawZigZagLine(y2, 20 + level * 50, color(80, 160, 255), wave);
-
-  // cerchio centrale pulsante
-  let size = map(level, 0, 0.4, 40, 180);
+  // ovale “danza” in alto, ma piccolo per non coprire
+  let size = map(level, 0, 0.4, 40, 120);
   noStroke();
   fill(255, 150, 0, 150);
   ellipse(width / 2, height * 0.18, size, size * 0.6);
 }
 
-/* ---------------- VISUAL SARABANDA ---------------- */
+/* ---------------- SARABANDA ---------------- */
 
 function drawCalmPills(spectrum, level) {
-  let bands = 6;
-  let bandHeight = 30;
-  let gap = 15;
-  let startY = height * 0.3;
+  let bands = 5;
+  let bandHeight = 22;
+  let gap = 18;
+  let startY = height * 0.30; // parte centrale, ben staccata dalle scritte
 
   rectMode(CENTER);
   noStroke();
@@ -208,51 +218,66 @@ function drawCalmPills(spectrum, level) {
     for (let i = start; i < end; i++) avg += spectrum[i];
     avg /= max(end - start, 1);
 
-    let w = map(avg, 0, 255, width * 0.2, width * 0.85);
+    let w = map(avg, 0, 255, width * 0.25, width * 0.80);
 
     // palette calma
     let c;
-    if (b < 2) c = color(180, 200, 255, 200);      // azzurrino
-    else if (b < 4) c = color(160, 220, 200, 200); // verde acqua
-    else c = color(220, 190, 255, 200);            // lilla
+    if (b === 0) c = color(190, 210, 255, 210);      // azzurrino
+    else if (b === 1) c = color(170, 225, 205, 210); // verde acqua
+    else if (b === 2) c = color(215, 200, 255, 210); // lilla
+    else if (b === 3) c = color(200, 220, 240, 210); // celeste
+    else c = color(230, 210, 245, 210);              // viola chiaro
 
     fill(c);
-    rect(width / 2, y, w, bandHeight + level * 30, bandHeight);
+    rect(width / 2, y, w, bandHeight + level * 25, bandHeight);
   }
 }
 
 function drawSlowWave(wave, level) {
   noFill();
   stroke(90, 120, 200);
-  strokeWeight(3 + level * 10);
+  strokeWeight(2 + level * 6);
   beginShape();
-  for (let i = 0; i < wave.length; i += 8) {
-    let x = map(i, 0, wave.length, 0, width);
-    let y = height * 0.80 + wave[i] * 60;
+  for (let i = 0; i < wave.length; i += 10) {
+    let x = map(i, 0, wave.length, 40, width - 40);
+    let y = height * 0.80 + wave[i] * 35; // ondina morbida
     vertex(x, y);
   }
   endShape();
 }
 
-function drawSarabandaVisual(spectrum, wave, level) {
-  // sfondo freddo e calmo
-  let bg = lerpColor(color(235, 240, 255), color(225, 230, 245), constrain(level * 5, 0, 1));
-  background(bg);
-
-  drawCalmPills(spectrum, level);
-  drawSlowWave(wave, level);
-
-  // puntini lenti come “passi”
+function drawStepDots(level) {
   let steps = 6;
-  let baseY = height * 0.2;
+  let baseY = height * 0.20;
   noStroke();
-  fill(80, 120, 180, 200);
+  fill(80, 120, 180, 220);
   for (let i = 0; i < steps; i++) {
     let x = map(i, 0, steps - 1, width * 0.15, width * 0.85);
-    let d = 14 + level * 40;
+    let d = 10 + level * 30;
     ellipse(x, baseY, d, d);
   }
 }
+
+function drawSarabandaVisual(spectrum, wave, level) {
+  // sfondo freddo e calmo
+  let bg = lerpColor(
+    color(235, 240, 255),
+    color(220, 225, 240),
+    constrain(level * 4, 0, 1)
+  );
+  background(bg);
+
+  // piccoli “passi lenti” in alto
+  drawStepDots(level);
+
+  // pilloline orizzontali al centro
+  drawCalmPills(spectrum, level);
+
+  // onda lenta in basso
+  drawSlowWave(wave, level);
+}
+
+
 
 
 
