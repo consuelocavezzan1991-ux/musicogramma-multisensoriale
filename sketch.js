@@ -166,26 +166,30 @@ function drawDot(x, y, d, col) {
 }
 
 // ---------------------------------------------------------------------------
-// 🕒 Timeline "Danza delle ore"
+// 🕒 Timeline "Danza delle ore" – sincronizzata con il video
 // ---------------------------------------------------------------------------
 
 let danzaTimeline = [
-  { time: 2, type: "zigzag", x: 80, y: 120, col: "red" },
-  { time: 3, type: "zigzag", x: 230, y: 120, col: "red" },
-  { time: 4, type: "zigzag", x: 380, y: 120, col: "red" },
-  { time: 5, type: "zigzag", x: 530, y: 120, col: "red" },
-  { time: 6, type: "smile", x: 155, y: 230, col: "orange" },
-  { time: 7, type: "smile", x: 305, y: 230, col: "orange" },
-  { time: 8, type: "smile", x: 455, y: 230, col: "orange" },
-  { time: 9, type: "swirl", x: 770, y: 220, col: "green" },
-  { time: 10, type: "wave", x: 80, y: 370, col: "blue" },
-  { time: 12, type: "wave", x: 80, y: 430, col: "blue" },
-  { time: 14, type: "zigzag", x: 140, y: 530, col: "red" },
-  { time: 15, type: "wave", x: 140, y: 570, col: "blue" },
+  { time: 2.0, type: "zigzag", x: 80, y: 120, col: "red" },
+  { time: 3.0, type: "zigzag", x: 230, y: 120, col: "red" },
+  { time: 4.0, type: "zigzag", x: 380, y: 120, col: "red" },
+  { time: 5.0, type: "zigzag", x: 530, y: 120, col: "red" },
+
+  { time: 6.5, type: "smile", x: 155, y: 230, col: "orange" },
+  { time: 7.5, type: "smile", x: 305, y: 230, col: "orange" },
+  { time: 8.5, type: "smile", x: 455, y: 230, col: "orange" },
+
+  { time: 9.5, type: "swirl", x: 770, y: 220, col: "green" },
+
+  { time: 10.5, type: "wave", x: 80, y: 370, col: "blue" },
+  { time: 12.0, type: "wave", x: 80, y: 430, col: "blue" },
+
+  { time: 14.0, type: "zigzag", x: 140, y: 530, col: "red" },
+  { time: 15.0, type: "wave", x: 140, y: 570, col: "blue" }
 ];
 
 // ---------------------------------------------------------------------------
-// 🕒 Timeline "Sarabanda"
+// 🕒 Timeline "Sarabanda" – da completare se vuoi
 // ---------------------------------------------------------------------------
 
 let sarabandaTimeline = [
@@ -195,31 +199,5 @@ let sarabandaTimeline = [
   { time: 6, type: "pill", x: 160, y: 185, col: "orange" },
   { time: 7, type: "pill", x: 740, y: 185, col: "orange" },
   { time: 8, type: "dot", x: 450, y: 185, col: "orange" },
-  { time: 10, type: "pill", x: 160, y: 240, col: "yellow" },
-  { time: 11, type: "pill", x: 740, y: 240, col: "yellow" },
-  { time: 12, type: "dot", x: 450, y: 240, col: "yellow" },
-  { time: 14, type: "pill", x: 160, y: 295, col: "green" },
-  { time: 15, type: "pill", x: 740, y: 295, col: "green" },
-  { time: 16, type: "dot", x: 450, y: 295, col: "green" },
-  { time: 18, type: "pill", x: 160, y: 350, col: "cyan" },
-  { time: 19, type: "pill", x: 740, y: 350, col: "cyan" },
-  { time: 20, type: "dot", x: 450, y: 350, col: "cyan" },
-  { time: 22, type: "pill", x: 160, y: 405, col: "blue" },
-  { time: 23, type: "pill", x: 740, y: 405, col: "blue" },
-  { time: 24, type: "dot", x: 450, y: 405, col: "blue" },
-  { time: 26, type: "pill", x: 160, y: 460, col: "pink" },
-  { time: 27, type: "pill", x: 740, y: 460, col: "violet" },
-  { time: 28, type: "zigzag", x: 80, y: 530, col: "red" },
-  { time: 29, type: "zigzag", x: 140, y: 500, col: "orange" },
-  { time: 30, type: "zigzag", x: 200, y: 530, col: "green" },
-  { time: 31, type: "zigzag", x: 260, y: 500, col: "green" },
-  { time: 32, type: "pill", x: 600, y: 520, col: "cyan" },
-  { time: 33, type: "dot", x: 540, y: 580, col: "blue" },
-  { time: 34, type: "dot", x: 590, y: 580, col: "blue" },
-  { time: 35, type: "dot", x: 640, y: 580, col: "blue" },
-  { time: 36, type: "pill", x: 160, y: 630, col: "pink" },
-  { time: 37, type: "pill", x: 740, y: 630, col: "violet" }
-];
-
-
+  { time: 10, type: "pill", x: 160,
 
