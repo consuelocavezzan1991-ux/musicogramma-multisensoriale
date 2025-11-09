@@ -1,13 +1,16 @@
-// --- Audio e stato generale -------------------------------------------------
+// ---------------------------------------------------------------------------
+//            Musicogramma multisensoriale – sketch p5.js
+// ---------------------------------------------------------------------------
 
+// Audio e stato generale
 let danzaAudio;
 let sarabandaAudio;
 let currentTrack = null;
 let currentName = "";
 let ready = false;
 
+// Carica i file audio (i nomi devono coincidere con i file nel repo)
 function preload() {
-  // ATTENZIONE: i nomi devono coincidere con i file nel repo!
   danzaAudio = loadSound("danza.mp3", () => {
     console.log("Danza caricata");
   });
@@ -17,13 +20,13 @@ function preload() {
 }
 
 function setup() {
-  // canvas più alto per avere spazio per il musicogramma
-  const canvas = createCanvas(800, 600);
+  // Canvas abbastanza alto per contenere i musicogrammi
+  const canvas = createCanvas(900, 650);
   canvas.parent("canvas-container");
 
   background(245);
   textAlign(CENTER, CENTER);
-  textSize(20);
+  textSize(22);
   fill(0);
   text("Seleziona un brano e premi Play", width / 2, height / 2);
 
@@ -87,7 +90,9 @@ function draw() {
   }
 }
 
-// --- Selezione e controllo dei brani ----------------------------------------
+// ---------------------------------------------------------------------------
+//                   Selezione e controllo dei brani
+// ---------------------------------------------------------------------------
 
 function selectTrack(name) {
   stopTrack();
@@ -348,3 +353,4 @@ function drawSarabandaScore() {
   drawPill(leftX, y, pillW, pillH, pink);
   drawPill(rightX, y, pillW, pillH, violet);
 }
+
