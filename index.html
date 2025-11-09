@@ -8,13 +8,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.sound.min.js"></script>
 
-    <!-- Collegamento al file sketch -->
+    <!-- Collegamento al file sketch.js -->
     <script src="sketch.js" defer></script>
 
     <style>
       body {
         margin: 0;
-        font-family: sans-serif;
+        font-family: system-ui, sans-serif;
         background: #f5f5f5;
         color: #111;
         text-align: center;
@@ -25,8 +25,14 @@
       }
 
       h1 {
-        font-size: 2.4rem;
-        margin-bottom: 0.5rem;
+        font-size: 2.6rem;
+        margin-bottom: 0.2rem;
+      }
+
+      p.subtitle {
+        margin-top: 0;
+        font-size: 1.1rem;
+        color: #444;
       }
 
       .btn-bar {
@@ -44,11 +50,12 @@
         font-size: 1rem;
         cursor: pointer;
         background: #e0e0e0;
-        transition: background 0.2s;
+        transition: background 0.2s, transform 0.1s;
       }
 
       button:hover {
         background: #d4d4d4;
+        transform: translateY(-1px);
       }
 
       button.primary {
@@ -56,9 +63,17 @@
         color: white;
       }
 
+      button.primary:hover {
+        background: #1559ba;
+      }
+
       button.danger {
         background: #e74c3c;
         color: white;
+      }
+
+      button.danger:hover {
+        background: #c0392b;
       }
 
       #canvas-container {
@@ -78,15 +93,22 @@
   <body>
     <div id="ui">
       <h1>Musicogramma interattivo</h1>
+      <p class="subtitle">
+        Visualizzazione sincronizzata di “Danza delle ore” e “Sarabanda”.
+      </p>
+
       <div class="btn-bar">
         <button id="btn-danza">Danza delle ore</button>
         <button id="btn-sarabanda">Sarabanda</button>
         <button id="btn-play" class="primary">Play</button>
         <button id="btn-stop" class="danger">Stop</button>
       </div>
+
       <p id="status">Seleziona un brano e premi "Play".</p>
     </div>
-    <div id="canvas-container"></div>
+
+    <div id="canvas-container">
+      <!-- Qui p5.js disegnerà il canvas -->
+    </div>
   </body>
 </html>
-
