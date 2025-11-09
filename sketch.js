@@ -45,9 +45,10 @@ let sarabandaTimeline = [
 ];
 
 function preload() {
-  danzaAudio = loadSound("danza.mp3");
-  sarabandaAudio = loadSound("sarabanda.mp3");
+  danzaAudio = loadSound("../assets/danza.mp3");
+  sarabandaAudio = loadSound("../assets/sarabanda.mp3");
 }
+
 
 function setup() {
   createCanvas(900, 750).parent("canvas-container");
@@ -156,3 +157,4 @@ function drawPill(x, y, w, h, col) {
 }
 
 function drawDot(x,
+
