@@ -4,7 +4,7 @@ let currentName = "";
 let ampAnalyzer;
 let animOffset = 0;
 let ready = false;
-let audioOffset = 0.8; // compensazione per il silenzio iniziale
+let audioOffset = 1.2; // compensazione ritardo audio
 
 function preload() {
   danzaAudio = loadSound("danza.mp3");
@@ -83,11 +83,6 @@ function setStatus(msg) {
   const el = document.getElementById("status");
   if (el) el.textContent = msg;
 }
-
-// ---------------------------------------------------------------------------
-// 🎨 Disegno forme
-// ---------------------------------------------------------------------------
-
 function drawEvent(ev) {
   let col = color(ev.col);
   if (ev.type === "zigzag") drawZigZag(ev.x, ev.y, 25, 15, 4, col);
@@ -159,11 +154,6 @@ function drawDot(x, y, d, col) {
   fill(col);
   ellipse(x, y, d, d);
 }
-
-// ---------------------------------------------------------------------------
-// 🕒 Timeline "Danza delle ore"
-// ---------------------------------------------------------------------------
-
 let danzaTimeline = [
   { time: 2.0, type: "zigzag", x: 80, y: 120, col: "red" },
   { time: 3.0, type: "zigzag", x: 230, y: 120, col: "red" },
@@ -184,11 +174,6 @@ let danzaTimeline = [
   { time: 16.5, type: "wave", x: 380, y: 570, col: "blue" },
   { time: 17.5, type: "wave", x: 530, y: 570, col: "blue" }
 ];
-
-// ---------------------------------------------------------------------------
-// 🕒 Timeline "Sarabanda"
-// ---------------------------------------------------------------------------
-
 let sarabandaTimeline = [
   { time: 2.0, type: "pill", x: 160, y: 130, col: "red" },
   { time: 3.0, type: "pill", x: 740, y: 130, col: "red" },
@@ -230,6 +215,7 @@ let sarabandaTimeline = [
   { time: 36.0, type: "pill", x: 160, y: 630, col: "pink" },
   { time: 37.0, type: "pill", x: 740, y: 630, col: "violet" }
 ];
+
 
 
 
