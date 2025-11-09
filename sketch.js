@@ -173,14 +173,16 @@ let danzaTimeline = [
   { time: 6.5, type: "smile", x: 155, y: 230, col: "orange" },
   { time: 7.5, type: "smile", x: 305, y: 230, col: "orange" },
   { time: 8.5, type: "smile", x: 455, y: 230, col: "orange" },
+  { time: 9.5, type: "smile", x: 605, y: 230, col: "green" },
 
-  { time: 9.5, type: "swirl", x: 770, y: 220, col: "green" },
+  { time: 11.0, type: "wave", x: 80, y: 330, col: "blue" },
+  { time: 12.0, type: "wave", x: 80, y: 390, col: "blue" },
+  { time: 13.0, type: "wave", x: 80, y: 450, col: "blue" },
 
-  { time: 10.5, type: "wave", x: 80, y: 370, col: "blue" },
-  { time: 12.0, type: "wave", x: 80, y: 430, col: "blue" },
-
-  { time: 14.0, type: "zigzag", x: 140, y: 530, col: "red" },
-  { time: 15.0, type: "wave", x: 140, y: 570, col: "blue" }
+  { time: 14.5, type: "zigzag", x: 80, y: 530, col: "red" },
+  { time: 15.5, type: "wave", x: 230, y: 570, col: "blue" },
+  { time: 16.5, type: "wave", x: 380, y: 570, col: "blue" },
+  { time: 17.5, type: "wave", x: 530, y: 570, col: "blue" }
 ];
 
 // ---------------------------------------------------------------------------
@@ -188,46 +190,47 @@ let danzaTimeline = [
 // ---------------------------------------------------------------------------
 
 let sarabandaTimeline = [
-  { time: 2, type: "pill", x: 160, y: 130, col: "red" },
-  { time: 3, type: "pill", x: 740, y: 130, col: "red" },
-  { time: 4, type: "dot", x: 450, y: 130, col: "red" },
+  { time: 2.0, type: "pill", x: 160, y: 130, col: "red" },
+  { time: 3.0, type: "pill", x: 740, y: 130, col: "red" },
+  { time: 4.0, type: "dot", x: 450, y: 130, col: "red" },
 
-  { time: 6, type: "pill", x: 160, y: 185, col: "orange" },
-  { time: 7, type: "pill", x: 740, y: 185, col: "orange" },
-  { time: 8, type: "dot", x: 450, y: 185, col: "orange" },
+  { time: 6.0, type: "pill", x: 160, y: 185, col: "orange" },
+  { time: 7.0, type: "pill", x: 740, y: 185, col: "orange" },
+  { time: 8.0, type: "dot", x: 450, y: 185, col: "orange" },
 
-  { time: 10, type: "pill", x: 160, y: 240, col: "yellow" },
-  { time: 11, type: "pill", x: 740, y: 240, col: "yellow" },
-  { time: 12, type: "dot", x: 450, y: 240, col: "yellow" },
+  { time: 10.0, type: "pill", x: 160, y: 240, col: "yellow" },
+  { time: 11.0, type: "pill", x: 740, y: 240, col: "yellow" },
+  { time: 12.0, type: "dot", x: 450, y: 240, col: "yellow" },
 
-  { time: 14, type: "pill", x: 160, y: 295, col: "green" },
-  { time: 15, type: "pill", x: 740, y: 295, col: "green" },
-  { time: 16, type: "dot", x: 450, y: 295, col: "green" },
+  { time: 14.0, type: "pill", x: 160, y: 295, col: "green" },
+  { time: 15.0, type: "pill", x: 740, y: 295, col: "green" },
+  { time: 16.0, type: "dot", x: 450, y: 295, col: "green" },
 
-  { time: 18, type: "pill", x: 160, y: 350, col: "cyan" },
-  { time: 19, type: "pill", x: 740, y: 350, col: "cyan" },
-  { time: 20, type: "dot", x: 450, y: 350, col: "cyan" },
+  { time: 18.0, type: "pill", x: 160, y: 350, col: "cyan" },
+  { time: 19.0, type: "pill", x: 740, y: 350, col: "cyan" },
+  { time: 20.0, type: "dot", x: 450, y: 350, col: "cyan" },
 
-  { time: 22, type: "pill", x: 160, y: 405, col: "blue" },
-  { time: 23, type: "pill", x: 740, y: 405, col: "blue" },
-  { time: 24, type: "dot", x: 450, y: 405, col: "blue" },
+  { time: 22.0, type: "pill", x: 160, y: 405, col: "blue" },
+  { time: 23.0, type: "pill", x: 740, y: 405, col: "blue" },
+  { time: 24.0, type: "dot", x: 450, y: 405, col: "blue" },
 
-  { time: 26, type: "pill", x: 160, y: 460, col: "pink" },
-  { time: 27, type: "pill", x: 740, y: 460, col: "violet" },
+  { time: 26.0, type: "pill", x: 160, y: 460, col: "pink" },
+  { time: 27.0, type: "pill", x: 740, y: 460, col: "violet" },
 
-  { time: 28, type: "zigzag", x: 80, y: 530, col: "red" },
-  { time: 29, type: "zigzag", x: 140, y: 500, col: "orange" },
-  { time: 30, type: "zigzag", x: 200, y: 530, col: "green" },
-  { time: 31, type: "zigzag", x: 260, y: 500, col: "green" },
+  { time: 28.0, type: "zigzag", x: 80, y: 530, col: "red" },
+  { time: 29.0, type: "zigzag", x: 140, y: 500, col: "orange" },
+  { time: 30.0, type: "zigzag", x: 200, y: 530, col: "green" },
+  { time: 31.0, type: "zigzag", x: 260, y: 500, col: "green" },
 
-  { time: 32, type: "pill", x: 600, y: 520, col: "cyan" },
-  { time: 33, type: "dot", x: 540, y: 580, col: "blue" },
-  { time: 34, type: "dot", x: 590, y: 580, col: "blue" },
-  { time: 35, type: "dot", x: 640, y: 580, col: "blue" },
+  { time: 32.0, type: "pill", x: 600, y: 520, col: "cyan" },
+  { time: 33.0, type: "dot", x: 540, y: 580, col: "blue" },
+  { time: 34.0, type: "dot", x: 590, y: 580, col: "blue" },
+  { time: 35.0, type: "dot", x: 640, y: 580, col: "blue" },
 
-  { time: 36, type: "pill", x: 160, y: 630, col: "pink" },
-  { time: 37, type: "pill", x: 740, y: 630, col: "violet" }
+  { time: 36.0, type: "pill", x: 160, y: 630, col: "pink" },
+  { time: 37.0, type: "pill", x: 740, y: 630, col: "violet" }
 ];
+
 
 
 
