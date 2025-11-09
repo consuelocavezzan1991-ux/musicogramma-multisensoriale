@@ -6,8 +6,8 @@ let animOffset = 0;
 let ready = false;
 
 function preload() {
-  danzaAudio = loadSound("danza.mp3");
-  sarabandaAudio = loadSound("sarabanda.mp3");
+  danzaAudio = loadSound("assets/danza.mp3");
+  sarabandaAudio = loadSound("assets/sarabanda.mp3");
 }
 
 function setup() {
@@ -39,14 +39,9 @@ function draw() {
   animOffset = currentTrack.isPlaying() ? map(ampAnalyzer.getLevel(), 0, 0.3, 0, 25) : 0;
   let t = currentTrack.currentTime();
 
-  if (currentName === "Danza delle ore") {
-    for (let ev of danzaTimeline) {
-      if (t >= ev.time) drawEvent(ev);
-    }
-  } else if (currentName === "Sarabanda") {
-    for (let ev of sarabandaTimeline) {
-      if (t >= ev.time) drawEvent(ev);
-    }
+  let timeline = currentName === "Danza delle ore" ? danzaTimeline : sarabandaTimeline;
+  for (let ev of timeline) {
+    if (t >= ev.time) drawEvent(ev);
   }
 
   fill(0);
@@ -171,7 +166,7 @@ function drawDot(x, y, d, col) {
 }
 
 // ---------------------------------------------------------------------------
-// 🕒 Timeline sincronizzata per "Danza delle ore"
+// 🕒 Timeline "Danza delle ore"
 // ---------------------------------------------------------------------------
 
 let danzaTimeline = [
@@ -179,23 +174,25 @@ let danzaTimeline = [
   { time: 3, type: "zigzag", x: 230, y: 120, col: "red" },
   { time: 4, type: "zigzag", x: 380, y: 120, col: "red" },
   { time: 5, type: "zigzag", x: 530, y: 120, col: "red" },
-  { time: 6, type: "zigzag", x: 80, y: 175, col: "red" },
-  { time: 7, type: "zigzag", x: 230, y: 175, col: "red" },
-  { time: 8, type: "zigzag", x: 380, y: 175, col: "red" },
-  { time: 9, type: "zigzag", x: 530, y: 175, col: "red" },
-  { time: 10, type: "smile", x: 155, y: 230, col: "orange" },
-  { time: 11, type: "smile", x: 305, y: 230, col: "orange" },
-  { time: 12, type: "smile", x: 455, y: 230, col: "orange" },
-  { time: 13, type: "swirl", x: 770, y: 220, col: "green" },
-  { time: 14, type: "smile", x: 155, y: 285, col: "orange" },
-  { time: 15, type: "smile", x: 305, y: 285, col: "orange" },
-  { time: 16, type: "smile", x: 455, y: 285, col: "orange" },
-  { time: 17, type: "swirl", x: 100, y: 295, col: "green" },
-  { time: 18, type: "wave", x: 80, y: 370, col: "blue" },
-  { time: 20, type: "wave", x: 80, y: 430, col: "blue" },
-  { time: 22, type: "zigzag", x: 140, y:
+  { time: 6, type: "smile", x: 155, y: 230, col: "orange" },
+  { time: 7, type: "smile", x: 305, y: 230, col: "orange" },
+  { time: 8, type: "smile", x: 455, y: 230, col: "orange" },
+  { time: 9, type: "swirl", x: 770, y: 220, col: "green" },
+  { time: 10, type: "wave", x: 80, y: 370, col: "blue" },
+  { time: 12, type: "wave", x: 80, y: 430, col: "blue" },
+  { time: 14, type: "zigzag", x: 140, y: 530, col: "red" },
+  { time: 15, type: "wave", x: 140, y: 570, col: "blue" },
+];
 
+// ---------------------------------------------------------------------------
+// 🕒 Timeline "Sarabanda"
+// ---------------------------------------------------------------------------
 
-
-
-
+let sarabandaTimeline = [
+  { time: 2, type: "pill", x: 160, y: 130, col: "red" },
+  { time: 3, type: "pill", x: 740, y: 130, col: "red" },
+  { time: 4, type: "dot", x: 450, y: 130, col: "red" },
+  { time: 6, type: "pill", x: 160, y: 185, col: "orange" },
+  { time: 7, type: "pill", x: 740, y: 185, col: "orange" },
+  { time: 8, type: "dot", x: 450, y: 185, col: "orange" },
+  { time: 10, type: "pill", x: 160, y: 
