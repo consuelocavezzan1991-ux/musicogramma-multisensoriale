@@ -1,3 +1,41 @@
+let musica;
+let scelta = "danza"; // puoi cambiare con "sarabanda"
+
+function preload() {
+  if (scelta === "danza") {
+    musica = loadSound("Danza delle Ore - MUSICOGRAMMA - Normal.mp3");
+  } else if (scelta === "sarabanda") {
+    musica = loadSound("Sarabanda MUSICOGRAMMA Handel - Musica.mp3");
+  }
+}
+
+function setup() {
+  createCanvas(800, 400);
+  background(240);
+  textAlign(CENTER, CENTER);
+  textSize(20);
+  text("Clicca per avviare il musicogramma", width / 2, height / 2);
+}
+
+function draw() {
+  // esempio semplice di visualizzazione
+  if (musica && musica.isPlaying()) {
+    background(100, 150, 255);
+    let amp = musica.getLevel();
+    let size = map(amp, 0, 1, 10, 200);
+    fill(255, 200, 0);
+    ellipse(width / 2, height / 2, size);
+  }
+}
+
+function mousePressed() {
+  if (musica.isPlaying()) {
+    musica.pause();
+  } else {
+    musica.loop();
+  }
+}
+
 // === Variabili globali ===
 let danzaSound, sarabandaSound;
 let currentTrack = null;     // 'danza' | 'sarabanda' | null
@@ -201,3 +239,4 @@ function stopPlayback() {
   isPlaying = false;
   document.getElementById("btnPlayPause").textContent = "Play";
 }
+
