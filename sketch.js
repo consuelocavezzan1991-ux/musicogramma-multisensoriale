@@ -1,281 +1,185 @@
 let danzaAudio, sarabandaAudio;
-let currentTrack = null;
-let currentName = "";
-let fft;
-let amplitude;
-let ready = false;
+let danzaImg, sarabandaImg;
 
+let currentTrack = null;   // puntatore al brano selezionato
+let currentImg = null;     // immagine del musicogramma
+let currentName = "";      // nome brano per il testo
+let isPlaying = false;
+
+// ---------------------------------------------------------------------
+//  PRELOAD: carico audio + immagini
+// ---------------------------------------------------------------------
 function preload() {
-  // I nomi devono coincidere con i file nel repo
+  // rinomina i file audio come li hai nel repository, se diverso
   danzaAudio = loadSound("danza.mp3");
   sarabandaAudio = loadSound("sarabanda.mp3");
+
+  // immagini dei musicogrammi
+  danzaImg = loadImage("danza_musicogramma.png");
+  sarabandaImg = loadImage("sarabanda_musicogramma.png");
 }
 
+// ---------------------------------------------------------------------
+//  SETUP
+// ---------------------------------------------------------------------
 function setup() {
-  const canvas = createCanvas(800, 450);
+  const canvas = createCanvas(900, 600);
   canvas.parent("canvas-container");
 
-  fft = new p5.FFT();
-  amplitude = new p5.Amplitude();
+  textAlign(CENTER, CENTER);
+  textSize(18);
 
-  noFill();
+  // Collego i bottoni HTML
+  document.getElementById("btn-danza")
+    .addEventListener("click", () => selectTrack("danza"));
 
-  // Collego i pulsanti HTML
-  document.getElementById("btn-danza").addEventListener("click", () => {
-    selectTrack("danza");
-  });
+  document.getElementById("btn-sarabanda")
+    .addEventListener("click", () => selectTrack("sarabanda"));
 
-  document.getElementById("btn-sarabanda").addEventListener("click", () => {
-    selectTrack("sarabanda");
-  });
+  document.getElementById("btn-play")
+    .addEventListener("click", togglePlayPause);
 
-  document.getElementById("btn-play").addEventListener("click", () => {
-    playTrack();
-  });
+  document.getElementById("btn-stop")
+    .addEventListener("click", stopTrack);
 
-  document.getElementById("btn-stop").addEventListener("click", () => {
-    stopTrack();
-  });
-
-  ready = true;
-  setStatus("Pronto. Seleziona un brano.");
+  setStatus("Pronto. Seleziona un brano e poi premi Play.");
 }
 
+// ---------------------------------------------------------------------
+//  DRAW
+// ---------------------------------------------------------------------
 function draw() {
-  if (!ready) return;
+  background(255);
 
-  background(245);
-
-  // Nessun brano selezionato
-  if (!currentTrack) {
-    fill(100);
-    textAlign(CENTER, CENTER);
-    textSize(20);
-    text("Seleziona un brano e premi Play", width / 2, height / 2);
+  // Se non è stato scelto nessun brano
+  if (!currentTrack || !currentImg) {
+    fill(80);
+    textSize(22);
+    text("Seleziona un brano per vedere il musicogramma", width / 2, height / 2);
     return;
   }
 
-  // Titolo
-  fill(0);
-  textAlign(CENTER, TOP);
-  textSize(24);
-  text(currentName, width / 2, 10);
+  // Disegno il musicogramma al centro
+  imageMode(CENTER);
+  const imgW = width * 0.8;
+  const imgH = height * 0.8;
+  image(currentImg, width / 2, height / 2, imgW, imgH);
 
-  // Messaggio di stato
+  // Testo in alto con il nome del brano
+  fill(0);
+  noStroke();
+  textSize(26);
+  text(currentName, width / 2, 30);
+
   textSize(14);
-  fill(120);
-  if (!currentTrack.isPlaying()) {
-    text("Brano in pausa (premi Play per ascoltare)", width / 2, 40);
+  if (currentTrack.isPlaying()) {
+    fill(40, 160, 90);
+    text("In riproduzione – segui il pallino con il dito", width / 2, 60);
   } else {
-    text("Segui le linee con il dito mentre ascolti", width / 2, 40);
+    fill(120);
+    text("Brano in pausa – premi Play per ascoltare", width / 2, 60);
   }
 
-  // Se non sta suonando, niente animazione
-  if (!currentTrack.isPlaying()) return;
-
-  // Analisi audio
-  let spectrum = fft.analyze();
-  let wave = fft.waveform();
-  let level = amplitude.getLevel();
-
-  // Visualizzazione diversa per i due brani
-  if (currentName === "Danza delle ore") {
-    drawDanzaVisual(spectrum, wave, level);
-  } else if (currentName === "Sarabanda") {
-    drawSarabandaVisual(spectrum, wave, level);
+  // Se il brano è in riproduzione, disegno il “puntatore” che scorre
+  if (currentTrack.isPlaying()) {
+    drawPointer();
   }
 }
 
-/* ---------------- SELEZIONE / PLAY / STOP ---------------- */
+// ---------------------------------------------------------------------
+//  FUNZIONE CHE DISEGNA IL PALLINO CHE SCORRE SUL MUSICOGRAMMA
+// ---------------------------------------------------------------------
+function drawPointer() {
+  const t = currentTrack.currentTime();   // tempo corrente
+  const d = currentTrack.duration();      // durata totale
+  if (d === 0) return;
 
+  const progress = constrain(t / d, 0, 1);  // tra 0 e 1
+
+  // Percorso orizzontale in basso all’immagine
+  const marginX = width * 0.1;
+  const y = height * 0.88; // leggermente sopra il bordo
+
+  const x = map(progress, 0, 1, marginX, width - marginX);
+
+  // pallino che pulsa
+  const baseSize = 22;
+  const pulse = 4 * sin(frameCount * 0.2);
+  const r = baseSize + pulse;
+
+  noStroke();
+  let col;
+  if (currentTrack === danzaAudio) {
+    col = color(0, 140, 255, 200);     // blu per Danza delle ore
+  } else {
+    col = color(255, 80, 150, 200);    // rosa per Sarabanda
+  }
+  fill(col);
+  ellipse(x, y, r * 2);
+}
+
+// ---------------------------------------------------------------------
+//  GESTIONE BRANI
+// ---------------------------------------------------------------------
 function selectTrack(name) {
+  // fermo eventuali brani in esecuzione
   stopTrack();
 
   if (name === "danza") {
     currentTrack = danzaAudio;
+    currentImg = danzaImg;
     currentName = "Danza delle ore";
   } else if (name === "sarabanda") {
     currentTrack = sarabandaAudio;
+    currentImg = sarabandaImg;
     currentName = "Sarabanda";
   }
 
-  setStatus(`Brano selezionato: ${currentName}. Premi "Play".`);
+  isPlaying = false;
+  setStatus(`Brano selezionato: ${currentName}. Premi "Play" per avviare.`);
 }
 
-function playTrack() {
+// Play/Pausa
+function togglePlayPause() {
   if (!currentTrack) {
     setStatus("Seleziona prima un brano.");
     return;
   }
 
+  // Sblocco audio (richiesto da alcuni browser)
   userStartAudio().then(() => {
     if (!currentTrack.isPlaying()) {
       currentTrack.play();
-      fft.setInput(currentTrack);
-      amplitude.setInput(currentTrack);
+      isPlaying = true;
       setStatus(`Riproduzione di: ${currentName}`);
+    } else {
+      currentTrack.pause();
+      isPlaying = false;
+      setStatus(`Brano in pausa: ${currentName}`);
     }
   });
 }
 
+// Stop totale
 function stopTrack() {
-  if (danzaAudio && danzaAudio.isPlaying()) danzaAudio.stop();
-  if (sarabandaAudio && sarabandaAudio.isPlaying()) sarabandaAudio.stop();
+  if (danzaAudio && danzaAudio.isPlaying()) {
+    danzaAudio.stop();
+  }
+  if (sarabandaAudio && sarabandaAudio.isPlaying()) {
+    sarabandaAudio.stop();
+  }
+  isPlaying = false;
   setStatus("Riproduzione interrotta.");
 }
 
+// ---------------------------------------------------------------------
+//  UTILITÀ
+// ---------------------------------------------------------------------
 function setStatus(msg) {
   const el = document.getElementById("status");
   if (el) el.textContent = msg;
 }
 
-/* ---------------- FUNZIONCINE DI DISEGNO ---------------- */
-
-// zig-zag “da seguire col dito”
-function drawZigZagLine(yBase, amp, col, wave, densita = 10) {
-  stroke(col);
-  strokeWeight(3);
-  noFill();
-  beginShape();
-  for (let i = 0; i < wave.length; i += densita) {
-    let x = map(i, 0, wave.length, 40, width - 40);
-    // zig-zag regolare + piccola modulazione con la forma d’onda
-    let z = (i % (densita * 4) < (densita * 2) ? -1 : 1) * amp;
-    let y = yBase + z + wave[i] * 40; // meno rumore verticale
-    vertex(x, y);
-  }
-  endShape();
-}
-
-// barre ritmiche in basso (più basse e separate)
-function drawBeatBars(spectrum, level) {
-  let step = 22;
-  let maxH = 120; // altezza massima barre
-  for (let x = 40; x < width - 40; x += step) {
-    let index = floor(map(x, 40, width - 40, 0, spectrum.length - 1));
-    let energy = spectrum[index];
-
-    let h = map(energy, 0, 255, 10, maxH) + level * 40;
-    let y = height - 30 - h; // distacco dal bordo basso
-
-    // alterno colori vivaci
-    let m = (x / step) % 4;
-    if (m === 0) fill(255, 80, 80, 200);        // rosso
-    else if (m === 1) fill(255, 200, 80, 200); // giallo
-    else if (m === 2) fill(80, 200, 120, 200); // verde
-    else fill(80, 160, 255, 200);              // azzurro
-
-    noStroke();
-    rect(x, y, step - 4, h, 4);
-  }
-}
-
-/* ---------------- DANZA DELLE ORE ---------------- */
-
-function drawDanzaVisual(spectrum, wave, level) {
-  // sfondo leggermente “ballerino”
-  let bg = map(level, 0, 0.4, 245, 230);
-  background(bg);
-
-  // Zona centrale per le linee da seguire col dito
-  let y1 = height * 0.30; // ~135
-  let y2 = height * 0.45; // ~200
-
-  // prima linea zig-zag (più ampia)
-  drawZigZagLine(y1, 25 + level * 50, color(255, 80, 120), wave, 12);
-
-  // seconda linea zig-zag (più calma)
-  drawZigZagLine(y2, 18 + level * 40, color(80, 160, 255), wave, 12);
-
-  // barre ritmiche ben separate in basso
-  drawBeatBars(spectrum, level);
-
-  // ovale “danza” in alto, ma piccolo per non coprire
-  let size = map(level, 0, 0.4, 40, 120);
-  noStroke();
-  fill(255, 150, 0, 150);
-  ellipse(width / 2, height * 0.18, size, size * 0.6);
-}
-
-/* ---------------- SARABANDA ---------------- */
-
-function drawCalmPills(spectrum, level) {
-  let bands = 5;
-  let bandHeight = 22;
-  let gap = 18;
-  let startY = height * 0.30; // parte centrale, ben staccata dalle scritte
-
-  rectMode(CENTER);
-  noStroke();
-
-  for (let b = 0; b < bands; b++) {
-    let y = startY + b * (bandHeight + gap);
-
-    // prendo energia di una fetta di spettro
-    let start = floor((b / bands) * spectrum.length);
-    let end = floor(((b + 1) / bands) * spectrum.length);
-    let avg = 0;
-    for (let i = start; i < end; i++) avg += spectrum[i];
-    avg /= max(end - start, 1);
-
-    let w = map(avg, 0, 255, width * 0.25, width * 0.80);
-
-    // palette calma
-    let c;
-    if (b === 0) c = color(190, 210, 255, 210);      // azzurrino
-    else if (b === 1) c = color(170, 225, 205, 210); // verde acqua
-    else if (b === 2) c = color(215, 200, 255, 210); // lilla
-    else if (b === 3) c = color(200, 220, 240, 210); // celeste
-    else c = color(230, 210, 245, 210);              // viola chiaro
-
-    fill(c);
-    rect(width / 2, y, w, bandHeight + level * 25, bandHeight);
-  }
-}
-
-function drawSlowWave(wave, level) {
-  noFill();
-  stroke(90, 120, 200);
-  strokeWeight(2 + level * 6);
-  beginShape();
-  for (let i = 0; i < wave.length; i += 10) {
-    let x = map(i, 0, wave.length, 40, width - 40);
-    let y = height * 0.80 + wave[i] * 35; // ondina morbida
-    vertex(x, y);
-  }
-  endShape();
-}
-
-function drawStepDots(level) {
-  let steps = 6;
-  let baseY = height * 0.20;
-  noStroke();
-  fill(80, 120, 180, 220);
-  for (let i = 0; i < steps; i++) {
-    let x = map(i, 0, steps - 1, width * 0.15, width * 0.85);
-    let d = 10 + level * 30;
-    ellipse(x, baseY, d, d);
-  }
-}
-
-function drawSarabandaVisual(spectrum, wave, level) {
-  // sfondo freddo e calmo
-  let bg = lerpColor(
-    color(235, 240, 255),
-    color(220, 225, 240),
-    constrain(level * 4, 0, 1)
-  );
-  background(bg);
-
-  // piccoli “passi lenti” in alto
-  drawStepDots(level);
-
-  // pilloline orizzontali al centro
-  drawCalmPills(spectrum, level);
-
-  // onda lenta in basso
-  drawSlowWave(wave, level);
-}
 
 
 
