@@ -202,7 +202,7 @@
           .addEventListener("click", () => selectTrack("sarabanda"));
         document
           .getElementById("btn-play")
-          .addEventListener("click", togglePlayPause);
+          .addEventListener("click", () => togglePlayPause);
         document
           .getElementById("btn-stop")
           .addEventListener("click", stopTrack);
@@ -322,9 +322,9 @@
           currentPath = pathDanza;
           currentDurations = durationsDanza;
 
-          // leggermente più veloce della musica
-          speedFactor = 1.08;
-          startHold = 0.4;
+          // più veloce della musica per allinearsi al video
+          speedFactor = 1.15;
+          startHold = 0.3;
         } else {
           currentTrack = sarabandaAudio;
           currentImg = sarabandaImg;
@@ -381,6 +381,8 @@
     </script>
   </body>
 </html>
+
+
 
 
 
