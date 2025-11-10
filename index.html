@@ -99,15 +99,10 @@
       let currentPath = null;
       let currentDurations = null;
 
-      // questi servono solo per Sarabanda (Danza usa i tempi reali)
+      // fattore velocità globale (1 = segue esattamente la musica)
       let speedFactor = 1.0;
+      // tempo in secondi in cui il pallino resta sulla prima figura
       let startHold = 0.0;
-
-      // ----------------------------
-      // fattore "di tempo" per DANZA
-      // ----------------------------
-      const tempoFactorDanza = 0.1; // più piccolo = più lento, più grande = più veloce
-      const danzaOffset = 0.0;      // per spostare tutto avanti/indietro se serve
 
       // -------------------------------------------------------------
       //  PUNTI DANZA DELLE ORE (31 figure)
@@ -147,79 +142,45 @@
       ];
 
       // -------------------------------------------------------------
-      //  TEMPI REALI DAL VIDEO (secondi) PER DANZA
+      //  DURATE RELATIVE FIGURE DANZA (dai tuoi secondi)
+      //  figure 1–31, ogni valore = end - start
       // -------------------------------------------------------------
-      // start / end di OGNI figura (1–31)
-      const danzaStartTimes = [
-        0.00, // 1
-        0.02, // 2
-        0.03, // 3
-        0.04, // 4
-        0.06, // 5
-        0.09, // 6
-        0.10, // 7
-        0.11, // 8
-        0.12, // 9
-        0.14, // 10
-        0.16, // 11
-        0.17, // 12
-        0.19, // 13
-        0.21, // 14
-        0.23, // 15
-        0.25, // 16
-        0.26, // 17
-        0.27, // 18
-        0.29, // 19
-        0.32, // 20
-        0.36, // 21 (tu chiamavi 22)
-        0.39, // 22 (tu chiamavi 23)
-        0.44, // 23
-        0.45, // 24
-        0.46, // 25
-        0.47, // 26
-        0.48, // 27
-        0.49, // 28
-        0.50, // 29
-        0.51, // 30
-        0.52  // 31
-      ];
-
-      const danzaEndTimes = [
-        0.01, // 1
-        0.03, // 2
-        0.04, // 3
-        0.06, // 4
-        0.08, // 5
-        0.10, // 6
-        0.11, // 7
-        0.12, // 8
-        0.14, // 9
-        0.16, // 10
-        0.17, // 11
-        0.19, // 12
-        0.21, // 13
-        0.23, // 14
-        0.25, // 15
-        0.26, // 16
-        0.27, // 17
-        0.28, // 18
-        0.32, // 19
-        0.36, // 20
-        0.39, // 21
-        0.44, // 22
-        0.45, // 23
-        0.46, // 24
-        0.47, // 25
-        0.48, // 26
-        0.49, // 27
-        0.50, // 28
-        0.51, // 29
-        0.52, // 30
-        0.53  // 31
+      const durationsDanza = [
+        0.01, // 1: 0.00 -> 0.01
+        0.01, // 2: 0.02 -> 0.03
+        0.01, // 3: 0.03 -> 0.04
+        0.02, // 4: 0.04 -> 0.06
+        0.02, // 5: 0.06 -> 0.08
+        0.01, // 6: 0.09 -> 0.10
+        0.01, // 7: 0.10 -> 0.11
+        0.01, // 8: 0.11 -> 0.12
+        0.02, // 9: 0.12 -> 0.14
+        0.02, // 10: 0.14 -> 0.16
+        0.01, // 11: 0.16 -> 0.17
+        0.02, // 12: 0.17 -> 0.19
+        0.02, // 13: 0.19 -> 0.21
+        0.02, // 14: 0.21 -> 0.23
+        0.02, // 15: 0.23 -> 0.25
+        0.01, // 16: 0.25 -> 0.26
+        0.01, // 17: 0.26 -> 0.27
+        0.01, // 18: 0.27 -> 0.28
+        0.03, // 19: 0.29 -> 0.32
+        0.04, // 20: 0.32 -> 0.36
+        0.03, // 21: 0.36 -> 0.39  (tu la chiamavi 22)
+        0.05, // 22: 0.39 -> 0.44  (tu la chiamavi 23)
+        0.01, // 23: 0.44 -> 0.45
+        0.01, // 24: 0.45 -> 0.46
+        0.01, // 25: 0.46 -> 0.47
+        0.01, // 26: 0.47 -> 0.48
+        0.01, // 27: 0.48 -> 0.49
+        0.01, // 28: 0.49 -> 0.50
+        0.01, // 29: 0.50 -> 0.51
+        0.01, // 30: 0.51 -> 0.52
+        0.01  // 31: 0.52 -> 0.53
       ];
 
       // -------------------------------------------------------------
-      //  SARABANDA (semplice)
+      //  SARABANDA (semplice, tutte uguali)
       // -------------------------------------------------------------
       const pathSarabanda = [
         { u: 0.1, v: 0.1 },
@@ -302,52 +263,22 @@
         textSize(20);
         text(currentName, width / 2, 30);
 
-        if (currentTrack && currentTrack.isPlaying() && currentPath) {
-          if (currentTrack === danzaAudio) {
-            drawPointerDanza(imgW, imgH);
-          } else {
-            drawPointerGeneric(imgW, imgH);
-          }
+        if (currentTrack && currentTrack.isPlaying() && currentPath && currentDurations) {
+          drawPointer(imgW, imgH);
         }
       }
 
       // -------------------------------------------------------------
-      //  PALLINO – DANZA DELLE ORE (usa i tuoi tempi, ma rallentati)
+      //  PALLINO – usa le durate (Danze: quelle del video, Sarabanda: tutte uguali)
       // -------------------------------------------------------------
-      function drawPointerDanza(imgW, imgH) {
-        const rawT = currentTrack.currentTime();
-        // applichiamo fattore di tempo + eventuale offset
-        const t = rawT * tempoFactorDanza + danzaOffset;
-
-        const n = pathDanza.length;
-        let idx = n - 1;
-
-        if (t <= danzaStartTimes[0]) {
-          idx = 0;
-        } else if (t >= danzaEndTimes[n - 1]) {
-          idx = n - 1;
-        } else {
-          for (let i = 0; i < n; i++) {
-            if (t >= danzaStartTimes[i] && t < danzaEndTimes[i]) {
-              idx = i;
-              break;
-            }
-          }
-        }
-
-        drawDot(pathDanza[idx], imgW, imgH);
-      }
-
-      // -------------------------------------------------------------
-      //  PALLINO – GENERICO (Sarabanda)
-      // -------------------------------------------------------------
-      function drawPointerGeneric(imgW, imgH) {
+      function drawPointer(imgW, imgH) {
         const t = currentTrack.currentTime();
         const d = currentTrack.duration();
-        if (!d || !currentPath || !currentDurations) return;
+        if (!d) return;
 
         const n = currentPath.length;
 
+        // fermo iniziale sulla prima figura, se previsto
         if (t < startHold) {
           drawDot(currentPath[0], imgW, imgH);
           return;
@@ -355,13 +286,19 @@
 
         const tEff = t - startHold;
 
-        let tNorm = (tEff / d) * speedFactor;
-        if (tNorm < 0) tNorm = 0;
-        if (tNorm > 0.999) tNorm = 0.999;
+        // progressione normalizzata (0..1) sulla durata del brano,
+        // leggermente scalata da speedFactor
+        let progress = (tEff / d) * speedFactor;
+        if (progress < 0) progress = 0;
+        if (progress > 0.999) progress = 0.999;
 
+        // totale "peso" (somma delle durate relative)
         const totalWeight = currentDurations.reduce((a, b) => a + b, 0);
-        const target = tNorm * totalWeight;
 
+        // punto target lungo la somma cumulativa
+        const target = progress * totalWeight;
+
+        // trova a quale figura corrisponde
         let cum = 0;
         let idx = n - 1;
         for (let i = 0; i < currentDurations.length; i++) {
@@ -372,11 +309,14 @@
           }
         }
 
+        if (idx < 0) idx = 0;
+        if (idx >= n) idx = n - 1;
+
         drawDot(currentPath[idx], imgW, imgH);
       }
 
       // -------------------------------------------------------------
-      //  DISEGNO PALLINO
+      //  DISEGNO DEL PALLINO
       // -------------------------------------------------------------
       function drawDot(pos, imgW, imgH) {
         const imgX = width / 2 - imgW / 2;
@@ -408,15 +348,18 @@
           currentImg = danzaImg;
           currentName = "Danza delle ore";
           currentPath = pathDanza;
-          currentDurations = null; // non servono, usiamo i tempi reali
-          speedFactor = 1.0;
-          startHold = 0.0;
+          currentDurations = durationsDanza;
+
+          // qui si calibra la velocità globale di Danza
+          speedFactor = 1.0; // se ti sembra lento, prova 1.05 o 1.1
+          startHold = 0.0;   // parte subito
         } else {
           currentTrack = sarabandaAudio;
           currentImg = sarabandaImg;
           currentName = "Sarabanda";
           currentPath = pathSarabanda;
           currentDurations = durationsSarabanda;
+
           speedFactor = 1.0;
           startHold = 0.5;
         }
