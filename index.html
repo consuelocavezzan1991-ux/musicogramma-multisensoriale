@@ -1,29 +1,112 @@
 <!DOCTYPE html>
 <html lang="it">
-<head>
-  <meta charset="UTF-8">
-  <title>Musicogramma Interattivo</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.sound.min.js"></script>
-</head>
-<body>
-  <h1>Musicogramma Interattivo</h1>
-  <p>Seleziona un brano e segui il musicogramma a schermo con il dito 🎵</p>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Musicogramma multisensoriale</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background: #f4f4f8;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
 
-  <div id="controls">
-    <button id="btn-danza">Danza delle ore</button>
-    <button id="btn-sarabanda">Sarabanda</button>
-    <button id="btn-play">Play</button>
-    <button id="btn-stop">Stop</button>
-  </div>
+      header {
+        text-align: center;
+        padding: 20px 10px 10px;
+      }
 
-  <div id="canvas-container"></div>
-  <p id="status">Pronto.</p>
+      h1 {
+        margin: 0;
+        font-size: 1.8rem;
+      }
 
-  <script src="sketch.js"></script>
-</body>
+      p.subtitle {
+        margin: 5px 0 0;
+        color: #555;
+        font-size: 0.95rem;
+      }
+
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+        margin: 10px 0 5px;
+      }
+
+      button {
+        border: none;
+        padding: 8px 16px;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.95rem;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        background: white;
+        transition: transform 0.08s ease, box-shadow 0.08s ease,
+          background 0.15s ease;
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+        background: #f0f7ff;
+      }
+
+      button:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+      }
+
+      #status {
+        margin-bottom: 10px;
+        font-size: 0.9rem;
+        color: #333;
+        text-align: center;
+        padding: 0 10px;
+      }
+
+      #canvas-container {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+        overflow: hidden;
+        margin-bottom: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Musicogramma multisensoriale</h1>
+      <p class="subtitle">
+        Scegli un brano, guarda il musicogramma e segui il pallino con il dito.
+      </p>
+    </header>
+
+    <div class="controls">
+      <button id="btn-danza">Danza delle ore</button>
+      <button id="btn-sarabanda">Sarabanda</button>
+      <button id="btn-play">Play / Pausa</button>
+      <button id="btn-stop">Stop</button>
+    </div>
+
+    <div id="status">Pronto. Seleziona un brano e poi premi Play.</div>
+
+    <!-- Qui dentro p5.js inserirà il canvas -->
+    <div id="canvas-container"></div>
+
+    <!-- p5.js + p5.sound -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.sound.min.js"></script>
+
+    <!-- Il tuo sketch -->
+    <script src="sketch.js"></script>
+  </body>
 </html>
+
 
 
 
