@@ -21,6 +21,29 @@
         font-size: 1.8rem;
       }
       p.subtitle {
+        margin: 5px 0 0;<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Musicogramma multisensoriale</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: system-ui, sans-serif;
+        background: #f4f4f8;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      header {
+        text-align: center;
+        padding: 20px 10px 10px;
+      }
+      h1 {
+        margin: 0;
+        font-size: 1.8rem;
+      }
+      p.subtitle {
         margin: 5px 0 0;
         color: #555;
         font-size: 0.95rem;
@@ -99,9 +122,11 @@
       let currentPath = null;
       let currentDurations = null;
 
-      // fattore velocità globale (1 = segue esattamente la musica)
+      // fattore velocità globale (1 = segue la musica;
+      // >1 un po' più veloce, <1 un po' più lento)
       let speedFactor = 1.0;
-      // tempo in secondi in cui il pallino resta sulla prima figura
+
+      // tempo (secondi) in cui il pallino resta fermo sulla prima figura
       let startHold = 0.0;
 
       // -------------------------------------------------------------
@@ -142,41 +167,45 @@
       ];
 
       // -------------------------------------------------------------
-      //  DURATE RELATIVE FIGURE DANZA (da te misurate sul video)
-      //  Ogni valore = end - start
+      //  DURATE RELATIVE DANZA
+      //
+      // 1–8: tutte uguali (niente rallentamento tra 4 e 5)
+      // 9, 19, 21: doppie
+      // 20, 22: quadruple
+      // resto: normali
       // -------------------------------------------------------------
       const durationsDanza = [
-        0.01, // 1: 0.00 -> 0.01
-        0.01, // 2: 0.02 -> 0.03
-        0.01, // 3: 0.03 -> 0.04
-        0.02, // 4: 0.04 -> 0.06
-        0.02, // 5: 0.06 -> 0.08
-        0.01, // 6: 0.09 -> 0.10
-        0.01, // 7: 0.10 -> 0.11
-        0.01, // 8: 0.11 -> 0.12
-        0.02, // 9: 0.12 -> 0.14
-        0.02, // 10: 0.14 -> 0.16
-        0.01, // 11: 0.16 -> 0.17
-        0.02, // 12: 0.17 -> 0.19
-        0.02, // 13: 0.19 -> 0.21
-        0.02, // 14: 0.21 -> 0.23
-        0.02, // 15: 0.23 -> 0.25
-        0.01, // 16: 0.25 -> 0.26
-        0.01, // 17: 0.26 -> 0.27
-        0.01, // 18: 0.27 -> 0.28
-        0.03, // 19: 0.29 -> 0.32
-        0.04, // 20: 0.32 -> 0.36
-        0.03, // 21: 0.36 -> 0.39
-        0.05, // 22: 0.39 -> 0.44
-        0.01, // 23: 0.44 -> 0.45
-        0.01, // 24: 0.45 -> 0.46
-        0.01, // 25: 0.46 -> 0.47
-        0.01, // 26: 0.47 -> 0.48
-        0.01, // 27: 0.48 -> 0.49
-        0.01, // 28: 0.49 -> 0.50
-        0.01, // 29: 0.50 -> 0.51
-        0.01, // 30: 0.51 -> 0.52
-        0.01  // 31: 0.52 -> 0.53
+        1, // 1
+        1, // 2
+        1, // 3
+        1, // 4
+        1, // 5
+        1, // 6
+        1, // 7
+        1, // 8
+        2, // 9  (più lunga)
+        1, // 10
+        1, // 11
+        1, // 12
+        1, // 13
+        1, // 14
+        1, // 15
+        1, // 16
+        1, // 17
+        1, // 18
+        2, // 19 (più lunga)
+        4, // 20 (ancora più lunga)
+        2, // 21 (più lunga)
+        4, // 22 (ancora più lunga)
+        1, // 23
+        1, // 24
+        1, // 25
+        1, // 26
+        1, // 27
+        1, // 28
+        1, // 29
+        1, // 30
+        1  // 31
       ];
 
       // -------------------------------------------------------------
@@ -269,14 +298,14 @@
       }
 
       // -------------------------------------------------------------
-      //  PALLINO – usa le durate relative (Danza: dal video, Sarabanda: uniformi)
+      //  PALLINO – usa le durate relative
       // -------------------------------------------------------------
       function drawPointer(imgW, imgH) {
         const t = currentTrack.currentTime();
         const d = currentTrack.duration();
         if (!d) return;
 
-        // fermo iniziale, se previsto
+        // fermo iniziale
         if (t < startHold) {
           drawDot(currentPath[0], imgW, imgH);
           return;
@@ -284,7 +313,7 @@
 
         const tEff = t - startHold;
 
-        // progressione 0..1 nel brano, con piccolo fattore di velocità
+        // progressione 0..1 con fattore di velocità
         let progress = (tEff / d) * speedFactor;
         if (progress < 0) progress = 0;
         if (progress > 0.999) progress = 0.999;
@@ -340,9 +369,9 @@
           currentPath = pathDanza;
           currentDurations = durationsDanza;
 
-          // qui regoli solo la velocità globale di Danza
-          speedFactor = 1.05; // se rallenta troppo, prova 1.06–1.08
-          startHold = 0.0;    // parte subito
+          // 🔧 QUI regoli solo la velocità globale di Danza
+          speedFactor = 1.0; // se vedi che sta un po' indietro, prova 1.03–1.05
+          startHold = 0.0;   // parte subito
         } else {
           currentTrack = sarabandaAudio;
           currentImg = sarabandaImg;
