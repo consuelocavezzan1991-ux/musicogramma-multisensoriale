@@ -12,7 +12,6 @@ let currentPath = null;    // percorso attivo per il pallino
 //  p = progressione (0 inizio brano, 1 fine brano)
 //  u = orizzontale (0 sinistra, 1 destra)
 //  v = verticale   (0 alto,    1 basso)
-//  → puoi lasciarli così, funzionano già; se vorrai, li potrai rifinire
 // ---------------------------------------------------------------------
 
 // Danza delle ore – parte dall'alto, scende e fa una S
@@ -44,7 +43,7 @@ let pathSarabanda = [
 //  PRELOAD: carico audio + immagini
 // ---------------------------------------------------------------------
 function preload() {
-  // nomi dei file (devono essere esattamente questi nella cartella)
+ 
   danzaAudio = loadSound("danza.mp3");
   sarabandaAudio = loadSound("sarabanda.mp3");
 
@@ -293,6 +292,7 @@ function mousePressed() {
     `{ p: ${p.toFixed(2)}, u: ${u.toFixed(2)}, v: ${v.toFixed(2)} },`
   );
 }
+
 
 
 
