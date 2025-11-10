@@ -2,7 +2,7 @@
 <html lang="it">
   <head>
     <meta charset="UTF-8" />
-    <title>Musicogramma multisensoriale – Registrazione punti</title>
+    <title>Registrazione punti - Danza delle ore</title>
     <style>
       body {
         margin: 0;
@@ -29,147 +29,62 @@
         font-size: 0.95rem;
       }
 
-      .controls {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        justify-content: center;
-        margin: 10px 0 5px;
-      }
-
-      button {
-        border: none;
-        padding: 8px 16px;
-        border-radius: 999px;
-        cursor: pointer;
-        font-size: 0.95rem;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-        background: white;
-        transition: transform 0.08s ease, box-shadow 0.08s ease,
-          background 0.15s ease;
-      }
-
-      button:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
-        background: #f0f7ff;
-      }
-
-      button:active {
-        transform: translateY(0);
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+      #canvas-container {
+        margin: 20px 0 30px;
+        border-radius: 16px;
+        overflow: hidden;
       }
 
       #status {
-        margin-bottom: 10px;
         font-size: 0.9rem;
         color: #333;
         text-align: center;
-        padding: 0 10px;
-      }
-
-      #canvas-container {
-        background: transparent;
-        border-radius: 16px;
-        margin-bottom: 30px;
+        padding: 0 10px 15px;
       }
     </style>
   </head>
 
   <body>
     <header>
-      <h1>Musicogramma multisensoriale</h1>
+      <h1>Registrazione punti – Danza delle ore</h1>
       <p class="subtitle">
-        MODALITÀ REGISTRAZIONE: clicca al centro di ogni figura mentre la musica va.
+        Clicca in ordine al centro di ogni figura (anche senza musica).
       </p>
     </header>
 
-    <div class="controls">
-      <button id="btn-danza">Danza delle ore</button>
-      <button id="btn-sarabanda">Sarabanda</button>
-      <button id="btn-play">Play / Pausa</button>
-      <button id="btn-stop">Stop</button>
+    <div id="status">
+      1. Aspetta che si carichi l'immagine. <br />
+      2. Poi apri la console (F12 → Console) e clicca in ordine tutte le figure.
     </div>
-
-    <div id="status">Pronto. Seleziona "Danza delle ore" e poi premi Play.</div>
 
     <div id="canvas-container"></div>
 
-    <!-- p5.js + p5.sound -->
+    <!-- p5.js (solo grafica, niente audio per ora) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.sound.min.js"></script>
 
     <script>
-      let danzaAudio, sarabandaAudio;
-      let danzaImg, sarabandaImg;
+      let danzaImg;
+      let punti = [];
 
-      let currentTrack = null;
-      let currentImg = null;
-      let currentName = "";
-      let currentPath = null;
-
-      // per dopo, quando useremo il pallino
-      let syncFactor = 1.5;
-
-      // -------------------------------------------------------------
-      //  QUI ANDRANNO I PUNTI BUONI (ORA LASCIAMO VUOTO)
-      // -------------------------------------------------------------
-      const pathDanza = [
-        // dopo la registrazione incollerai qui:
-        // { u: 0.12, v: 0.08 },
-        // { u: 0.25, v: 0.08 },
-        // ...
-      ];
-
-      // Sarabanda: per ora non ci interessa, useremo lo stesso metodo dopo
-      const pathSarabanda = [];
-
-      // -------------------------------------------------------------
-      //  PRELOAD: carico audio + immagini
-      // -------------------------------------------------------------
       function preload() {
-        danzaAudio = loadSound("danza.mp3");
-        sarabandaAudio = loadSound("sarabanda.mp3");
-
+        // carichiamo SOLO l'immagine del musicogramma di Danza
         danzaImg = loadImage("danza_musicogramma.png");
-        sarabandaImg = loadImage("sarabanda_musicogramma.png");
       }
 
-      // -------------------------------------------------------------
-      //  SETUP
-      // -------------------------------------------------------------
       function setup() {
         const canvas = createCanvas(900, 600);
         canvas.parent("canvas-container");
 
         textAlign(CENTER, CENTER);
         textSize(18);
-
-        document.getElementById("btn-danza")
-          .addEventListener("click", () => selectTrack("danza"));
-
-        document.getElementById("btn-sarabanda")
-          .addEventListener("click", () => selectTrack("sarabanda"));
-
-        document.getElementById("btn-play")
-          .addEventListener("click", togglePlayPause);
-
-        document.getElementById("btn-stop")
-          .addEventListener("click", stopTrack);
-
-        setStatus("Pronto. Seleziona 'Danza delle ore', poi Play e clicca le figure.");
       }
 
-      // -------------------------------------------------------------
-      //  DRAW
-      // -------------------------------------------------------------
       function draw() {
         background(244);
 
-        if (!currentTrack || !currentImg) {
+        if (!danzaImg) {
           fill(80);
-          textSize(22);
-          text("Seleziona un brano per vedere il musicogramma", width / 2, height / 2);
+          text("Caricamento immagine...", width / 2, height / 2);
           return;
         }
 
@@ -184,100 +99,32 @@
         rect(width / 2, height / 2, imgW + 8, imgH + 8, 18);
 
         // disegno il musicogramma
-        image(currentImg, width / 2, height / 2, imgW, imgH);
+        image(danzaImg, width / 2, height / 2, imgW, imgH);
 
-        // scritta sopra
-        fill(20);
-        noStroke();
-        textSize(26);
-        text(currentName, width / 2, 30);
-
-        textSize(14);
-        if (currentTrack.isPlaying()) {
-          fill(40, 160, 90);
-          text("In riproduzione – clicca al centro di ogni figura", width / 2, 60);
-        } else {
-          fill(120);
-          text("Brano in pausa – premi Play per continuare", width / 2, 60);
-        }
-
-        // in modalità registrazione NON disegniamo il pallino
-        // (così non ti confonde mentre clicchi le figure)
-      }
-
-      // -------------------------------------------------------------
-      //  GESTIONE BRANI
-      // -------------------------------------------------------------
-      function selectTrack(name) {
-        stopTrack();
-
-        if (name === "danza") {
-          currentTrack = danzaAudio;
-          currentImg = danzaImg;
-          currentName = "Danza delle ore";
-          currentPath = pathDanza;
-        } else if (name === "sarabanda") {
-          currentTrack = sarabandaAudio;
-          currentImg = sarabandaImg;
-          currentName = "Sarabanda";
-          currentPath = pathSarabanda;
-        }
-
-        setStatus(`Brano selezionato: ${currentName}. Premi Play e inizia a cliccare le figure.`);
-      }
-
-      // Play/Pausa
-      function togglePlayPause() {
-        if (!currentTrack) {
-          setStatus("Seleziona prima un brano (per ora Danza delle ore).");
-          return;
-        }
-
-        userStartAudio().then(() => {
-          if (!currentTrack.isPlaying()) {
-            currentTrack.play();
-            setStatus(`Riproduzione di: ${currentName}. Clicca le figure al momento giusto.`);
-          } else {
-            currentTrack.pause();
-            setStatus(`Brano in pausa: ${currentName}.`);
+        // disegno anche i punti già registrati
+        if (punti.length > 0) {
+          fill(0, 140, 255);
+          noStroke();
+          const imgX = width / 2 - imgW / 2;
+          const imgY = height / 2 - imgH / 2;
+          for (let p of punti) {
+            const x = imgX + p.u * imgW;
+            const y = imgY + p.v * imgH;
+            ellipse(x, y, 10);
           }
-        });
-      }
-
-      // Stop totale
-      function stopTrack() {
-        if (danzaAudio && danzaAudio.isPlaying()) {
-          danzaAudio.stop();
         }
-        if (sarabandaAudio && sarabandaAudio.isPlaying()) {
-          sarabandaAudio.stop();
-        }
-        setStatus("Riproduzione interrotta.");
       }
 
-      // -------------------------------------------------------------
-      //  UTILITÀ
-      // -------------------------------------------------------------
-      function setStatus(msg) {
-        const el = document.getElementById("status");
-        if (el) el.textContent = msg;
-      }
-
-      // -------------------------------------------------------------
-      //  REGISTRAZIONE PUNTI CON IL MOUSE
-      //  (clic dentro il musicogramma mentre il brano suona)
-      // -------------------------------------------------------------
+      // QUI REGISTRIAMO I PUNTI QUANDO CLICCHI
       function mousePressed() {
-        // serve un brano e un'immagine già selezionati
-        if (!currentTrack || !currentImg) return;
+        if (!danzaImg) return;
 
-        // dimensioni dell'immagine:
         const imgW = width * 0.8;
         const imgH = height * 0.8;
         const imgX = width / 2 - imgW / 2;
         const imgY = height / 2 - imgH / 2;
 
-        // se clicchi fuori dall'immagine → ignora
+        // se clicchi fuori dal musicogramma, ignoro
         if (
           mouseX < imgX ||
           mouseX > imgX + imgW ||
@@ -287,30 +134,31 @@
           return;
         }
 
-        // coordinate normalizzate 0..1
+        // coordinate normalizzate (0..1)
         const u = (mouseX - imgX) / imgW;
         const v = (mouseY - imgY) / imgH;
 
-        // stampa in console il punto da copiare
-        console.log(`{ u: ${u.toFixed(2)}, v: ${v.toFixed(2)} },`);
-      }
+        const punto = { u: u, v: v };
+        punti.push(punto);
 
-      // -------------------------------------------------------------
-      //  TASTIERA: SPAZIO = Play/Pausa, S = Stop
-      // -------------------------------------------------------------
-      function keyPressed() {
-        if (key === " ") {
-          togglePlayPause();
-          return false;
-        }
-        if (key === "s" || key === "S") {
-          stopTrack();
-          return false;
-        }
+        // stampiamo in console in formato pronto per pathDanza
+        console.log(
+          punti.length + ":",
+          `{ u: ${u.toFixed(2)}, v: ${v.toFixed(2)} },`
+        );
+
+        // aggiorno status a schermo
+        const status = document.getElementById("status");
+        status.textContent =
+          "Punti registrati: " +
+          punti.length +
+          ". Guarda la console (F12 → Console) e alla fine copia tutti i punti.";
       }
     </script>
   </body>
 </html>
+
+
 
 
 
