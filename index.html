@@ -96,7 +96,6 @@
 
       let speedFactor = 1.0;
       let startHold = 0.6;
-      let lastIdx = 0;
 
       // -------------------------------------------------------------
       //  PUNTI DANZA DELLE ORE
@@ -120,10 +119,10 @@
         { u: 0.5, v: 0.33 },
         { u: 0.63, v: 0.34 },
         { u: 0.76, v: 0.33 },
-        { u: 0.08, v: 0.49 },
-        { u: 0.32, v: 0.48 },
-        { u: 0.08, v: 0.61 },
-        { u: 0.32, v: 0.60 },
+        { u: 0.08, v: 0.49 }, // 19
+        { u: 0.32, v: 0.48 }, // 20
+        { u: 0.08, v: 0.61 }, // 21
+        { u: 0.32, v: 0.6 },  // 22
         { u: 0.08, v: 0.72 },
         { u: 0.23, v: 0.74 },
         { u: 0.09, v: 0.86 },
@@ -135,21 +134,22 @@
         { u: 0.45, v: 0.96 }
       ];
 
-      // pesi di durata: 1 = normale, 2 = doppia durata
+      // Durate relative (pesi)
+      // 19 -> 3, 20 -> 4, 21 -> 3, 22 -> 4
       const durationsDanza = [
-        1, 1, 1, 1,
-        1, 1, 1, 1, 1,
-        1, 1, 1, 1,
-        1, 1, 1, 1, 1,
-        1, 1, 2,  // figura 20 dura di più
-        1, 1, 1,
-        1, 1, 1, 1,
-        1, 2,     // figura 22 dura di più
-        1
+        1, 1, 1, 1,  // 1–4
+        1, 1, 1, 1, 1, // 5–9
+        1, 1, 1, 1, // 10–13
+        1, 1, 1, 1, 1, // 14–18
+        3, // 19
+        4, // 20
+        3, // 21
+        4, // 22
+        1, 1, 1, 1, 1, 1, 1, 1, 1 // 23–31
       ];
 
       // -------------------------------------------------------------
-      //  SARABANDA (semplice)
+      //  SARABANDA (semplice, tutte uguali)
       // -------------------------------------------------------------
       const pathSarabanda = [
         { u: 0.1, v: 0.1 },
@@ -163,7 +163,7 @@
         { u: 0.4, v: 0.88 },
         { u: 0.25, v: 0.92 }
       ];
-      const durationsSarabanda = [1,1,1,1,1,1,1,1,1,1];
+      const durationsSarabanda = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
 
       function preload() {
         danzaAudio = loadSound("danza.mp3");
@@ -178,74 +178,95 @@
         textAlign(CENTER, CENTER);
         textSize(18);
 
-        document.getElementById("btn-danza").addEventListener("click", () => selectTrack("danza"));
-        document.getElementById("btn-sarabanda").addEventListener("click", () => selectTrack("sarabanda"));
-        document.getElementById("btn-play").addEventListener("click", togglePlayPause);
-        document.getElementById("btn-stop").addEventListener("click", stopTrack);
+        document
+          .getElementById("btn-danza")
+          .addEventListener("click", () => selectTrack("danza"));
+        document
+          .getElementById("btn-sarabanda")
+          .addEventListener("click", () => selectTrack("sarabanda"));
+        document
+          .getElementById("btn-play")
+          .addEventListener("click", togglePlayPause);
+        document
+          .getElementById("btn-stop")
+          .addEventListener("click", stopTrack);
       }
 
       function draw() {
         background(244);
         if (!currentTrack || !currentImg) {
           fill(80);
-          text("Seleziona un brano per vedere il musicogramma", width/2, height/2);
+          text(
+            "Seleziona un brano per vedere il musicogramma",
+            width / 2,
+            height / 2
+          );
           return;
         }
 
         imageMode(CENTER);
-        const imgW = width*0.8, imgH = height*0.8;
-        fill(255); noStroke();
+        const imgW = width * 0.8,
+          imgH = height * 0.8;
+        fill(255);
+        noStroke();
         rectMode(CENTER);
-        rect(width/2, height/2, imgW+8, imgH+8, 18);
-        image(currentImg, width/2, height/2, imgW, imgH);
+        rect(width / 2, height / 2, imgW + 8, imgH + 8, 18);
+        image(currentImg, width / 2, height / 2, imgW, imgH);
+
         if (currentTrack.isPlaying()) drawPointer(imgW, imgH);
       }
 
       function drawPointer(imgW, imgH) {
         const t = currentTrack.currentTime();
         const d = currentTrack.duration();
-        const n = currentPath.length;
+        if (!d || !currentPath || !currentDurations) return;
 
-        // costruisci i tempi cumulativi in base ai pesi
-        const totalWeight = currentDurations.reduce((a,b)=>a+b,0);
-        const T = d / speedFactor;
-        const totalTime = T; // tempo totale usato dal pallino
+        const n = currentPath.length;
+        const totalWeight = currentDurations.reduce((a, b) => a + b, 0);
+        const totalTime = d / speedFactor;
         const times = [];
         let sum = 0;
         for (let w of currentDurations) {
-          sum += (w/totalWeight)*totalTime;
+          sum += (w / totalWeight) * totalTime;
           times.push(sum);
         }
 
-        // trova l'indice in base al tempo
-        let idx = 0;
-        for (let i=0; i<times.length; i++) {
-          if (t < startHold + times[i]) { idx = i; break; }
+        if (t < startHold) {
+          drawDot(currentPath[0], imgW, imgH);
+          return;
         }
-        if (idx >= n) idx = n-1;
 
-        const pos = currentPath[idx];
-        drawDot(pos, imgW, imgH);
+        const tEff = t - startHold;
+        let idx = n - 1;
+        for (let i = 0; i < times.length; i++) {
+          if (tEff <= times[i]) {
+            idx = i;
+            break;
+          }
+        }
+        if (idx < 0) idx = 0;
+        if (idx >= n) idx = n - 1;
+        drawDot(currentPath[idx], imgW, imgH);
       }
 
       function drawDot(pos, imgW, imgH) {
-        const imgX = width/2 - imgW/2;
-        const imgY = height/2 - imgH/2;
-        const x = imgX + pos.u*imgW;
-        const y = imgY + pos.v*imgH;
+        const imgX = width / 2 - imgW / 2;
+        const imgY = height / 2 - imgH / 2;
+        const x = imgX + pos.u * imgW;
+        const y = imgY + pos.v * imgH;
         const baseSize = 22;
-        const pulse = 4*sin(frameCount*0.25);
+        const pulse = 4 * sin(frameCount * 0.25);
         const r = baseSize + pulse;
         noStroke();
-        fill(0,140,255,220);
-        ellipse(x, y, r*2);
-        fill(0,140,255,70);
-        ellipse(x, y, r*3.2);
+        const col = color(0, 140, 255, 220);
+        fill(col);
+        ellipse(x, y, r * 2);
+        fill(0, 140, 255, 70);
+        ellipse(x, y, r * 3.2);
       }
 
       function selectTrack(name) {
         stopTrack();
-        lastIdx = 0;
         if (name === "danza") {
           currentTrack = danzaAudio;
           currentImg = danzaImg;
@@ -270,19 +291,19 @@
       function togglePlayPause() {
         if (!currentTrack) return;
         userStartAudio().then(() => {
-          currentTrack.isPlaying() ? currentTrack.pause() : currentTrack.play();
+          currentTrack.isPlaying()
+            ? currentTrack.pause()
+            : currentTrack.play();
         });
       }
 
       function stopTrack() {
-        if (danzaAudio.isPlaying()) danzaAudio.stop();
-        if (sarabandaAudio.isPlaying()) sarabandaAudio.stop();
-        lastIdx = 0;
+        if (danzaAudio && danzaAudio.isPlaying()) danzaAudio.stop();
+        if (sarabandaAudio && sarabandaAudio.isPlaying()) sarabandaAudio.stop();
       }
     </script>
   </body>
 </html>
-
 
 
 
