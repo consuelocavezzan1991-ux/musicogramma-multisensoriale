@@ -85,6 +85,7 @@
 
     <div id="canvas-container"></div>
 
+    <!-- p5.js + p5.sound -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.sound.min.js"></script>
 
@@ -142,8 +143,8 @@
       ];
 
       // Durate relative (pesi)
-      // 9, 19, 21 = 2 (un po' più lunghe)
-      // 20, 22 = 4 (le più lunghe)
+      // 9, 19, 21 = 2   (un po' più lunghe)
+      // 20, 22 = 4      (le più lunghe)
       const durationsDanza = [
         1, 1, 1, 1,   // 1–4
         1, 1, 1, 1,   // 5–8
@@ -323,7 +324,7 @@
           currentDurations = durationsDanza;
 
           // velocità globale del pallino per "Danza"
-          speedFactor = 2.8;
+          speedFactor = 2.6;   // <--- qui ora NON è più 1
           startHold = 0.6;
         } else {
           currentTrack = sarabandaAudio;
@@ -380,6 +381,8 @@
     </script>
   </body>
 </html>
+
+
 
 
 
