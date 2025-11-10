@@ -185,14 +185,22 @@
 
       // ------------------ PALLINO ------------------
       function drawPointer(imgW, imgH) {
-        const t = currentTrack.currentTime();
-        const d = currentTrack.duration();
-        if (!d || d <= 0) return;
+  const t = currentTrack.currentTime();
+  const d = currentTrack.duration();
+  if (!d || d <= 0) return;
 
-        const progress = (t / (d * (1 / syncFactor))) % 1;
-        const n = currentPath.length;
-        const idx = Math.min(Math.floor(progress * n), n - 1);
-        const pos = currentPath[idx];
+  // progress da 0 a 1, con margine per coprire tutto il brano
+  let progress = t / (d * (1 / syncFactor));
+  progress = constrain(progress * 1.02, 0, 1); // leggero anticipo per non saltare le ultime figure
+
+  const n = currentPath.length;
+  let idx = Math.floor(progress * n);
+
+  // se siamo all'ultimo punto, resta lì
+  if (idx >= n) idx = n - 1;
+
+  const pos = currentPath[idx];
+
 
         const imgX = width / 2 - imgW / 2;
         const imgY = height / 2 - imgH / 2;
@@ -258,6 +266,7 @@
     </script>
   </body>
 </html>
+
 
 
 
