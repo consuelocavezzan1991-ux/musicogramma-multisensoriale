@@ -99,10 +99,10 @@
       let currentPath = null;
       let currentDurations = null;
 
-      // velocità globale del pallino (più grande = più veloce della musica)
+      // fattore di velocità globale (1 = uguale alla musica)
       let speedFactor = 1.0;
 
-      // per quanti secondi resta fermo sulla prima figura all'inizio
+      // quanto resta fermo sulla prima figura all'inizio
       let startHold = 0.6;
 
       // -------------------------------------------------------------
@@ -248,7 +248,7 @@
       }
 
       // -------------------------------------------------------------
-      //  PALLINO – usa le durate pesate + velocità globale
+      //  PALLINO – mappa il tempo del brano sui pesi
       // -------------------------------------------------------------
       function drawPointer(imgW, imgH) {
         const t = currentTrack.currentTime();
@@ -257,19 +257,7 @@
 
         const n = currentPath.length;
 
-        // tempo totale "virtuale" che il pallino usa per completare il giro
-        const totalWeight = currentDurations.reduce((a, b) => a + b, 0);
-        const totalTime = d / speedFactor; // più piccolo = più veloce del brano
-
-        // calcolo tempi cumulativi per ogni figura in base ai pesi
-        const times = [];
-        let sum = 0;
-        for (let w of currentDurations) {
-          sum += (w / totalWeight) * totalTime;
-          times.push(sum);
-        }
-
-        // nei primissimi istanti resta sulla prima figura
+        // resta un attimo sulla prima figura
         if (t < startHold) {
           drawDot(currentPath[0], imgW, imgH);
           return;
@@ -277,14 +265,25 @@
 
         const tEff = t - startHold;
 
-        // trova l'indice della figura corrispondente a tEff
+        // tempo normalizzato (0..1) con un leggero fattore di velocità
+        let tNorm = (tEff / d) * speedFactor;
+        if (tNorm < 0) tNorm = 0;
+        if (tNorm > 0.999) tNorm = 0.999;
+
+        const totalWeight = currentDurations.reduce((a, b) => a + b, 0);
+        const target = tNorm * totalWeight; // posizione nella "linea dei pesi"
+
+        // trova a che figura corrisponde questo punto nella somma cumulativa
+        let cum = 0;
         let idx = n - 1;
-        for (let i = 0; i < times.length; i++) {
-          if (tEff <= times[i]) {
+        for (let i = 0; i < currentDurations.length; i++) {
+          cum += currentDurations[i];
+          if (target <= cum) {
             idx = i;
             break;
           }
         }
+
         if (idx < 0) idx = 0;
         if (idx >= n) idx = n - 1;
 
@@ -323,8 +322,8 @@
           currentPath = pathDanza;
           currentDurations = durationsDanza;
 
-          // velocità globale del pallino per "Danza"
-          speedFactor = 2.6;   // <--- qui ora NON è più 1
+          // leggermente più veloce della musica, ma non "impazzito"
+          speedFactor = 1.05;
           startHold = 0.6;
         } else {
           currentTrack = sarabandaAudio;
@@ -333,7 +332,8 @@
           currentPath = pathSarabanda;
           currentDurations = durationsSarabanda;
 
-          speedFactor = 1.5;
+          // per Sarabanda lo teniamo uguale alla musica
+          speedFactor = 1.0;
           startHold = 0.5;
         }
 
@@ -381,6 +381,7 @@
     </script>
   </body>
 </html>
+
 
 
 
