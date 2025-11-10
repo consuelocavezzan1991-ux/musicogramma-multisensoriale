@@ -4,13 +4,46 @@ let danzaImg, sarabandaImg;
 let currentTrack = null;   // puntatore al brano selezionato
 let currentImg = null;     // immagine del musicogramma
 let currentName = "";      // nome brano per il testo
-let isPlaying = false;
+
+let currentPath = null;    // percorso attivo per il pallino
+
+// ---------------------------------------------------------------------
+//  PERCORSI DEL PALLINO (da vedere come bozza già funzionante)
+//  p = progressione (0 inizio brano, 1 fine brano)
+//  u = orizzontale (0 sinistra, 1 destra)
+//  v = verticale   (0 alto,    1 basso)
+// ---------------------------------------------------------------------
+
+// Danza delle ore – percorso curvo che parte dall’alto e si muove a S
+let pathDanza = [
+  { p: 0.00, u: 0.50, v: 0.05 }, // in alto al centro
+  { p: 0.12, u: 0.30, v: 0.18 },
+  { p: 0.25, u: 0.15, v: 0.35 },
+  { p: 0.38, u: 0.28, v: 0.50 },
+  { p: 0.50, u: 0.50, v: 0.60 },
+  { p: 0.62, u: 0.72, v: 0.50 },
+  { p: 0.75, u: 0.85, v: 0.35 },
+  { p: 0.88, u: 0.70, v: 0.70 },
+  { p: 1.00, u: 0.50, v: 0.90 }  // in basso al centro
+];
+
+// Sarabanda – percorso più “a onda” da sinistra verso destra
+let pathSarabanda = [
+  { p: 0.00, u: 0.10, v: 0.08 }, // in alto a sinistra
+  { p: 0.15, u: 0.20, v: 0.25 },
+  { p: 0.30, u: 0.30, v: 0.45 },
+  { p: 0.45, u: 0.45, v: 0.60 },
+  { p: 0.60, u: 0.60, v: 0.50 },
+  { p: 0.75, u: 0.75, v: 0.65 },
+  { p: 0.90, u: 0.88, v: 0.80 },
+  { p: 1.00, u: 0.92, v: 0.92 }  // in basso a destra
+];
 
 // ---------------------------------------------------------------------
 //  PRELOAD: carico audio + immagini
 // ---------------------------------------------------------------------
 function preload() {
-  // rinomina i file audio come li hai nel repository, se diverso
+  // rinomina i file audio come li hai nel repository, se diversi
   danzaAudio = loadSound("danza.mp3");
   sarabandaAudio = loadSound("sarabanda.mp3");
 
@@ -49,7 +82,7 @@ function setup() {
 //  DRAW
 // ---------------------------------------------------------------------
 function draw() {
-  background(255);
+  background(244);
 
   // Se non è stato scelto nessun brano
   if (!currentTrack || !currentImg) {
@@ -59,14 +92,20 @@ function draw() {
     return;
   }
 
-  // Disegno il musicogramma al centro
+  // Disegno il riquadro bianco del musicogramma
   imageMode(CENTER);
   const imgW = width * 0.8;
   const imgH = height * 0.8;
+  fill(255);
+  noStroke();
+  rectMode(CENTER);
+  rect(width / 2, height / 2, imgW + 8, imgH + 8, 18);
+
+  // Disegno il musicogramma al centro
   image(currentImg, width / 2, height / 2, imgW, imgH);
 
   // Testo in alto con il nome del brano
-  fill(0);
+  fill(20);
   noStroke();
   textSize(26);
   text(currentName, width / 2, 30);
@@ -80,42 +119,81 @@ function draw() {
     text("Brano in pausa – premi Play per ascoltare", width / 2, 60);
   }
 
-  // Se il brano è in riproduzione, disegno il “puntatore” che scorre
-  if (currentTrack.isPlaying()) {
-    drawPointer();
+  // Se il brano è in riproduzione, disegno il pallino che segue il percorso
+  if (currentTrack.isPlaying() && currentPath) {
+    drawPointer(imgW, imgH);
   }
 }
 
 // ---------------------------------------------------------------------
-//  FUNZIONE CHE DISEGNA IL PALLINO CHE SCORRE SUL MUSICOGRAMMA
+//  FUNZIONE CHE DISEGNA IL PALLINO CHE SEGUE IL PERCORSO
 // ---------------------------------------------------------------------
-function drawPointer() {
+function drawPointer(imgW, imgH) {
   const t = currentTrack.currentTime();   // tempo corrente
   const d = currentTrack.duration();      // durata totale
-  if (d === 0) return;
+  if (!d || d <= 0) return;
 
-  const progress = constrain(t / d, 0, 1);  // tra 0 e 1
+  // progressione 0..1 sul brano
+  const progress = constrain(t / d, 0, 1);
 
-  // Percorso orizzontale in basso all’immagine
-  const marginX = width * 0.1;
-  const y = height * 0.88; // leggermente sopra il bordo
+  // Calcolo la posizione (u, v) nel percorso al progress
+  const pos = getPositionAtProgress(progress, currentPath);
+  if (!pos) return;
 
-  const x = map(progress, 0, 1, marginX, width - marginX);
+  // Converto (u, v) in coordinate pixel dentro l'immagine
+  const imgX = width / 2 - imgW / 2;
+  const imgY = height / 2 - imgH / 2;
+
+  const x = imgX + pos.u * imgW;
+  const y = imgY + pos.v * imgH;
 
   // pallino che pulsa
   const baseSize = 22;
-  const pulse = 4 * sin(frameCount * 0.2);
+  const pulse = 4 * sin(frameCount * 0.25);
   const r = baseSize + pulse;
 
   noStroke();
   let col;
   if (currentTrack === danzaAudio) {
-    col = color(0, 140, 255, 200);     // blu per Danza delle ore
+    col = color(0, 140, 255, 220);     // blu per Danza delle ore
   } else {
-    col = color(255, 80, 150, 200);    // rosa per Sarabanda
+    col = color(255, 80, 150, 220);    // rosa per Sarabanda
   }
   fill(col);
   ellipse(x, y, r * 2);
+
+  // alone leggero attorno
+  fill(red(col), green(col), blue(col), 70);
+  ellipse(x, y, r * 3.2);
+}
+
+// ---------------------------------------------------------------------
+//  CALCOLA POSIZIONE (u, v) AL PROGRESS p SUL PERCORSO
+// ---------------------------------------------------------------------
+function getPositionAtProgress(p, path) {
+  if (!path || path.length === 0) return null;
+
+  // Prima del primo punto → resta sul primo
+  if (p <= path[0].p) {
+    return { u: path[0].u, v: path[0].v };
+  }
+
+  // Scorro i segmenti [i, i+1] che contengono p
+  for (let i = 0; i < path.length - 1; i++) {
+    const p1 = path[i];
+    const p2 = path[i + 1];
+
+    if (p >= p1.p && p <= p2.p) {
+      const uTime = (p - p1.p) / (p2.p - p1.p); // 0..1
+      const u = lerp(p1.u, p2.u, uTime);
+      const v = lerp(p1.v, p2.v, uTime);
+      return { u, v };
+    }
+  }
+
+  // Dopo l'ultimo punto → resta sull’ultimo
+  const last = path[path.length - 1];
+  return { u: last.u, v: last.v };
 }
 
 // ---------------------------------------------------------------------
@@ -129,13 +207,14 @@ function selectTrack(name) {
     currentTrack = danzaAudio;
     currentImg = danzaImg;
     currentName = "Danza delle ore";
+    currentPath = pathDanza;
   } else if (name === "sarabanda") {
     currentTrack = sarabandaAudio;
     currentImg = sarabandaImg;
     currentName = "Sarabanda";
+    currentPath = pathSarabanda;
   }
 
-  isPlaying = false;
   setStatus(`Brano selezionato: ${currentName}. Premi "Play" per avviare.`);
 }
 
@@ -150,11 +229,9 @@ function togglePlayPause() {
   userStartAudio().then(() => {
     if (!currentTrack.isPlaying()) {
       currentTrack.play();
-      isPlaying = true;
       setStatus(`Riproduzione di: ${currentName}`);
     } else {
       currentTrack.pause();
-      isPlaying = false;
       setStatus(`Brano in pausa: ${currentName}`);
     }
   });
@@ -168,7 +245,6 @@ function stopTrack() {
   if (sarabandaAudio && sarabandaAudio.isPlaying()) {
     sarabandaAudio.stop();
   }
-  isPlaying = false;
   setStatus("Riproduzione interrotta.");
 }
 
@@ -179,6 +255,45 @@ function setStatus(msg) {
   const el = document.getElementById("status");
   if (el) el.textContent = msg;
 }
+
+// ---------------------------------------------------------------------
+//  (OPZIONALE) CATTURARE COORDINATE PER FARE UN PERCORSO PIÙ PRECISO
+//  Se clicchi dentro il musicogramma mentre suona, puoi leggere in console
+//  il progress, u e v e poi metterli nei path qui sopra.
+// ---------------------------------------------------------------------
+function mousePressed() {
+  if (!currentTrack || !currentImg) return;
+
+  const imgW = width * 0.8;
+  const imgH = height * 0.8;
+  const imgX = width / 2 - imgW / 2;
+  const imgY = height / 2 - imgH / 2;
+
+  if (
+    mouseX < imgX ||
+    mouseX > imgX + imgW ||
+    mouseY < imgY ||
+    mouseY > imgY + imgH
+  ) {
+    return; // clic fuori dal musicogramma
+  }
+
+  const t = currentTrack.currentTime();
+  const d = currentTrack.duration();
+  if (!d || d <= 0) return;
+
+  const p = t / d;
+  const u = (mouseX - imgX) / imgW;
+  const v = (mouseY - imgY) / imgH;
+
+  console.log(
+    "Aggiungi punto:",
+    `{ p: ${p.toFixed(2)}, u: ${u.toFixed(2)}, v: ${v.toFixed(2)} },`
+  );
+}
+
+}
+
 
 
 
