@@ -99,12 +99,18 @@
       let currentPath = null;
       let currentDurations = null;
 
-      // solo per Sarabanda (Danza ora usa i tempi reali)
+      // questi servono solo per Sarabanda (Danza usa i tempi reali)
       let speedFactor = 1.0;
-      let startHold = 0.0; // per Danza lo mettiamo a 0
+      let startHold = 0.0;
+
+      // ----------------------------
+      // fattore "di tempo" per DANZA
+      // ----------------------------
+      const tempoFactorDanza = 0.1; // più piccolo = più lento, più grande = più veloce
+      const danzaOffset = 0.0;      // per spostare tutto avanti/indietro se serve
 
       // -------------------------------------------------------------
-      //  PUNTI DANZA DELLE ORE
+      //  PUNTI DANZA DELLE ORE (31 figure)
       // -------------------------------------------------------------
       const pathDanza = [
         { u: 0.08, v: 0.07 }, // 1
@@ -140,8 +146,10 @@
         { u: 0.45, v: 0.96 }  // 31
       ];
 
-      // Tempi REALI (secondi) che hai misurato dal video per Danza
-      // 1..31 (abbiamo saltato solo il buco "21" che avevi scritto, ma ci sono comunque 31 figure)
+      // -------------------------------------------------------------
+      //  TEMPI REALI DAL VIDEO (secondi) PER DANZA
+      // -------------------------------------------------------------
+      // start / end di OGNI figura (1–31)
       const danzaStartTimes = [
         0.00, // 1
         0.02, // 2
@@ -163,8 +171,8 @@
         0.27, // 18
         0.29, // 19
         0.32, // 20
-        0.36, // 21 (il tuo "22")
-        0.39, // 22 (il tuo "23")
+        0.36, // 21 (tu chiamavi 22)
+        0.39, // 22 (tu chiamavi 23)
         0.44, // 23
         0.45, // 24
         0.46, // 25
@@ -210,11 +218,8 @@
         0.53  // 31
       ];
 
-      // eventuale piccolo offset se l'mp3 parte un filo prima/dopo del video
-      const danzaOffset = 0.0; // se serve, puoi provare 0.02, 0.03, ecc.
-
       // -------------------------------------------------------------
-      //  SARABANDA (semplice, tutte uguali)
+      //  SARABANDA (semplice)
       // -------------------------------------------------------------
       const pathSarabanda = [
         { u: 0.1, v: 0.1 },
@@ -297,7 +302,7 @@
         textSize(20);
         text(currentName, width / 2, 30);
 
-        if (currentTrack.isPlaying() && currentPath) {
+        if (currentTrack && currentTrack.isPlaying() && currentPath) {
           if (currentTrack === danzaAudio) {
             drawPointerDanza(imgW, imgH);
           } else {
@@ -307,12 +312,14 @@
       }
 
       // -------------------------------------------------------------
-      //  PALLINO – DANZA DELLE ORE (usa i tempi reali)
+      //  PALLINO – DANZA DELLE ORE (usa i tuoi tempi, ma rallentati)
       // -------------------------------------------------------------
       function drawPointerDanza(imgW, imgH) {
-        const t = currentTrack.currentTime() + danzaOffset;
-        const n = pathDanza.length;
+        const rawT = currentTrack.currentTime();
+        // applichiamo fattore di tempo + eventuale offset
+        const t = rawT * tempoFactorDanza + danzaOffset;
 
+        const n = pathDanza.length;
         let idx = n - 1;
 
         if (t <= danzaStartTimes[0]) {
@@ -332,7 +339,7 @@
       }
 
       // -------------------------------------------------------------
-      //  PALLINO – GENERICO (Sarabanda, semplice con durate uguali)
+      //  PALLINO – GENERICO (Sarabanda)
       // -------------------------------------------------------------
       function drawPointerGeneric(imgW, imgH) {
         const t = currentTrack.currentTime();
@@ -341,7 +348,6 @@
 
         const n = currentPath.length;
 
-        // leggera attesa sulla prima figura
         if (t < startHold) {
           drawDot(currentPath[0], imgW, imgH);
           return;
@@ -369,6 +375,9 @@
         drawDot(currentPath[idx], imgW, imgH);
       }
 
+      // -------------------------------------------------------------
+      //  DISEGNO PALLINO
+      // -------------------------------------------------------------
       function drawDot(pos, imgW, imgH) {
         const imgX = width / 2 - imgW / 2;
         const imgY = height / 2 - imgH / 2;
@@ -399,9 +408,9 @@
           currentImg = danzaImg;
           currentName = "Danza delle ore";
           currentPath = pathDanza;
-          currentDurations = null; // NON usiamo più i pesi
+          currentDurations = null; // non servono, usiamo i tempi reali
           speedFactor = 1.0;
-          startHold = 0.0; // parte subito con i tuoi tempi
+          startHold = 0.0;
         } else {
           currentTrack = sarabandaAudio;
           currentImg = sarabandaImg;
@@ -456,6 +465,8 @@
     </script>
   </body>
 </html>
+
+
 
 
 
