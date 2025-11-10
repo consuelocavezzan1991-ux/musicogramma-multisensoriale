@@ -111,7 +111,7 @@
       // offset percentuale sulla timeline: negativo = pallino in anticipo
       let leadPercent = 0.0;
 
-      // offset sull'indice delle figure: negativo = sposta il pallino verso le prime figure
+      // offset sull'indice delle figure: negativo = verso le prime figure
       let indexOffset = 0;
 
       // -------------------------------------------------------------
@@ -253,11 +253,12 @@
       }
 
       // -------------------------------------------------------------
-      //  PALLINO – sincronizzato con percentuale + anticipo + offset figura
+      //  PALLINO – percentuale + anticipo + offset figura
       // -------------------------------------------------------------
       function drawPointer(imgW, imgH) {
         const t = currentTrack.currentTime();
         const d = currentTrack.duration();
+
         if (!d || d <= 0 || !currentPath || currentPath.length === 0) return;
 
         const n = currentPath.length;
@@ -268,14 +269,16 @@
         // offset percentuale: negativo = pallino in anticipo
         progress += leadPercent;
 
-        // limitiamo tra 0 e poco meno di 1 per non oltrepassare l'array
-        progress = constrain(progress, 0, 0.999);
+        // clamp tra 0 e 0.999
+        if (progress < 0) progress = 0;
+        if (progress > 0.999) progress = 0.999;
 
         // indice nel path + offset di figura
         let idx = Math.floor(progress * n) + indexOffset;
 
-        // limitiamo l'indice tra 0 e n-1
-        idx = constrain(idx, 0, n - 1);
+        // clamp indice tra 0 e n-1
+        if (idx < 0) idx = 0;
+        if (idx > n - 1) idx = n - 1;
 
         const pos = currentPath[idx];
 
@@ -318,8 +321,8 @@
           // anticipo temporale (percentuale del brano)
           leadPercent = -0.04;
 
-          // riportiamo il pallino "indietro" di 2 posizioni
-          // così parte dalla prima figura invece che dalla terza
+          // se ti sembra parta dalla terza figura,
+          // puoi giocare con questo (-1, -2, -3...)
           indexOffset = -2;
         } else if (name === "sarabanda") {
           currentTrack = sarabandaAudio;
@@ -327,10 +330,7 @@
           currentName = "Sarabanda";
           currentPath = pathSarabanda;
 
-          // qui magari serve meno anticipo temporale
           leadPercent = -0.02;
-
-          // nessun offset sulle figure
           indexOffset = 0;
         }
 
