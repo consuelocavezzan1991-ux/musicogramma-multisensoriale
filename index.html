@@ -110,13 +110,9 @@
       let currentPath = null;    // percorso attivo per il pallino
 
       // ---------------------------------------------------------------------
-      //  PERCORSI DEL PALLINO
-      //  p = progressione (0 inizio brano, 1 fine brano)
-      //  u = orizzontale (0 sinistra, 1 destra)
-      //  v = verticale   (0 alto,    1 basso)
+      //  PERCORSI DEL PALLINO (Danza = tuoi clic esatti)
       // ---------------------------------------------------------------------
 
-      // Danza delle ore – percorso ESATTAMENTE dai tuoi clic (senza riscalare il tempo)
       let pathDanza = [
         { p: 0.00, u: 0.08, v: 0.07 },
         { p: 0.01, u: 0.22, v: 0.06 },
@@ -152,10 +148,10 @@
         { p: 0.35, u: 0.47, v: 0.84 },
         { p: 0.36, u: 0.38, v: 0.91 },
         { p: 0.37, u: 0.33, v: 0.95 },
-        { p: 0.38, u: 0.56, v: 0.93 },
+        { p: 0.38, u: 0.56, v: 0.93 }
       ];
 
-      // Sarabanda – percorso base (puoi rifarlo con lo stesso metodo quando vuoi)
+      // Sarabanda – lasciamo un percorso semplice
       let pathSarabanda = [
         { p: 0.00, u: 0.10, v: 0.08 },
         { p: 0.15, u: 0.20, v: 0.25 },
@@ -164,7 +160,7 @@
         { p: 0.60, u: 0.60, v: 0.50 },
         { p: 0.75, u: 0.75, v: 0.65 },
         { p: 0.90, u: 0.88, v: 0.80 },
-        { p: 1.00, u: 0.92, v: 0.92 },
+        { p: 1.00, u: 0.92, v: 0.92 }
       ];
 
       // ---------------------------------------------------------------------
@@ -258,29 +254,15 @@
       }
 
       // ---------------------------------------------------------------------
-      //  PALLINO (con speedFactor per Danza)
+      //  PALLINO (usa il tempo vero del brano, senza speedFactor)
       // ---------------------------------------------------------------------
       function drawPointer(imgW, imgH) {
-        const t = currentTrack.currentTime();   // tempo corrente
+        const t = currentTrack.currentTime();   // tempo corrente (secondi)
         const d = currentTrack.duration();      // durata totale
         if (!d || d <= 0) return;
 
-        // progress base 0..1
-        let baseProgress = t / d;
-        let progress;
-
-        if (currentTrack === danzaAudio) {
-          // ⚙️ Regola qui se vuoi velocizzare/anticipare Danza delle ore
-          const speedFactor = 1.7;   // >1 = più veloce (prova 1.5–2.0)
-          const offset = 0.02;       // quanto anticipare (0.0–0.05 circa)
-
-          progress = (baseProgress - offset) * speedFactor;
-        } else {
-          // Sarabanda normale
-          progress = baseProgress;
-        }
-
-        progress = constrain(progress, 0, 1);
+        // progressione 0..1 sul brano
+        const progress = constrain(t / d, 0, 1);
 
         const pos = getPositionAtProgress(progress, currentPath);
         if (!pos) return;
@@ -306,18 +288,40 @@
         ellipse(x, y, r * 3.2);
       }
 
+      // ---------------------------------------------------------------------
+      //  POSIZIONE (u,v) con TELETRASPORTO tra righe
+      // ---------------------------------------------------------------------
       function getPositionAtProgress(p, path) {
         if (!path || path.length === 0) return null;
-        if (p <= path[0].p) return { u: path[0].u, v: path[0].v };
+
+        if (p <= path[0].p) {
+          return { u: path[0].u, v: path[0].v };
+        }
 
         for (let i = 0; i < path.length - 1; i++) {
           const p1 = path[i];
           const p2 = path[i + 1];
+
           if (p >= p1.p && p <= p2.p) {
-            const f = (p - p1.p) / (p2.p - p1.p);
-            return { u: lerp(p1.u, p2.u, f), v: lerp(p1.v, p2.v, f) };
+            const bigJump = Math.abs(p2.v - p1.v) > 0.12; // salto di riga?
+
+            if (bigJump) {
+              // 👉 niente diagonale:
+              // finché non arrivo a p2.p resto sul punto della riga prima,
+              // appena lo supero salto sul punto della riga dopo.
+              if (p < p2.p) {
+                return { u: p1.u, v: p1.v };
+              } else {
+                return { u: p2.u, v: p2.v };
+              }
+            } else {
+              // movimento morbido normale sulla stessa riga
+              const f = (p - p1.p) / (p2.p - p1.p);
+              return { u: lerp(p1.u, p2.u, f), v: lerp(p1.v, p2.v, f) };
+            }
           }
         }
+
         const last = path[path.length - 1];
         return { u: last.u, v: last.v };
       }
@@ -378,7 +382,7 @@
 
       // ---------------------------------------------------------------------
       //  REGISTRAZIONE PERCORSO (clic → console)
-// ---------------------------------------------------------------------
+      // ---------------------------------------------------------------------
       function mousePressed() {
         if (!currentTrack || !currentImg) return;
 
@@ -392,8 +396,9 @@
           mouseX > imgX + imgW ||
           mouseY < imgY ||
           mouseY > imgY + imgH
-        )
+        ) {
           return;
+        }
 
         const t = currentTrack.currentTime();
         const d = currentTrack.duration();
@@ -425,6 +430,7 @@
     </script>
   </body>
 </html>
+
 
 
 
