@@ -291,7 +291,26 @@ function mousePressed() {
     "Aggiungi punto:",
     `{ p: ${p.toFixed(2)}, u: ${u.toFixed(2)}, v: ${v.toFixed(2)} },`
   );
+  // ---------------------------------------------------------------------
+//  CONTROLLO DA TASTIERA: Barra spaziatrice = Play/Pausa
+// ---------------------------------------------------------------------
+function keyPressed() {
+  // 32 è il codice della barra spaziatrice
+  if (keyCode === 32) {
+    // Evita che la pagina scorra
+    return false; 
+  }
 }
+
+function keyReleased() {
+  if (keyCode === 32) {
+    togglePlayPause(); // chiama la funzione Play/Pausa
+    return false;
+  }
+}
+
+
+
 
 
 
