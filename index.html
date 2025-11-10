@@ -107,99 +107,106 @@
       let currentTrack = null;   // brano selezionato
       let currentImg = null;     // immagine del musicogramma
       let currentName = "";      // nome brano
-      let currentPath = null;    // percorso attivo per il pallino
+      let currentPath = null;    // percorso attivo (ancore figure)
 
       // ---------------------------------------------------------------------
-      //  PERCORSI DEL PALLINO (Danza = tuoi clic esatti)
-      //  p = progressione (0 inizio brano, 1 fine brano)
+      //  ANCORE DELLE FIGURE (solo inizio figura, una dopo l'altra)
       //  u = orizzontale (0 sinistra, 1 destra)
       //  v = verticale   (0 alto,    1 basso)
       // ---------------------------------------------------------------------
 
-      // Danza delle ore – dai tuoi ultimi clic
+      // Danza delle ore: ho preso la "griglia" dai tuoi clic e messo
+      // una sola ancora per figura, in ordine di lettura (a serpentina).
+      // NON è perfetto come il tuo percorso curvo, ma è ordinato, senza diagonali
+      // e il pallino passa da una figura alla successiva.
       let pathDanza = [
-        { p: 0.00, u: 0.08, v: 0.07 },
-        { p: 0.01, u: 0.22, v: 0.06 },
-        { p: 0.02, u: 0.29, v: 0.07 },
-        { p: 0.03, u: 0.43, v: 0.06 },
-        { p: 0.03, u: 0.51, v: 0.07 },
-        { p: 0.04, u: 0.65, v: 0.07 },
-        { p: 0.04, u: 0.72, v: 0.07 },
-        { p: 0.05, u: 0.85, v: 0.08 },
-        { p: 0.05, u: 0.08, v: 0.17 },
-        { p: 0.06, u: 0.21, v: 0.16 },
-        { p: 0.06, u: 0.29, v: 0.16 },
-        { p: 0.07, u: 0.43, v: 0.16 },
-        { p: 0.07, u: 0.49, v: 0.13 },
-        { p: 0.08, u: 0.57, v: 0.15 },
-        { p: 0.08, u: 0.63, v: 0.13 },
-        { p: 0.09, u: 0.70, v: 0.14 },
-        { p: 0.09, u: 0.75, v: 0.16 },
-        { p: 0.10, u: 0.84, v: 0.13 },
-        { p: 0.10, u: 0.08, v: 0.26 },
-        { p: 0.11, u: 0.22, v: 0.26 },
-        { p: 0.12, u: 0.29, v: 0.27 },
-        { p: 0.13, u: 0.43, v: 0.25 },
-        { p: 0.13, u: 0.51, v: 0.27 },
-        { p: 0.14, u: 0.65, v: 0.27 },
-        { p: 0.14, u: 0.71, v: 0.27 },
-        { p: 0.15, u: 0.85, v: 0.26 },
-        { p: 0.15, u: 0.08, v: 0.35 },
-        { p: 0.17, u: 0.23, v: 0.37 },
-        { p: 0.17, u: 0.29, v: 0.36 },
-        { p: 0.18, u: 0.43, v: 0.35 },
-        { p: 0.18, u: 0.50, v: 0.33 },
-        { p: 0.19, u: 0.57, v: 0.34 },
-        { p: 0.19, u: 0.63, v: 0.33 },
-        { p: 0.20, u: 0.70, v: 0.33 },
-        { p: 0.20, u: 0.76, v: 0.33 },
-        { p: 0.20, u: 0.83, v: 0.32 },
-        { p: 0.20, u: 0.08, v: 0.49 },
-        { p: 0.23, u: 0.18, v: 0.45 },
-        { p: 0.23, u: 0.32, v: 0.47 },
-        { p: 0.24, u: 0.42, v: 0.46 },
-        { p: 0.24, u: 0.42, v: 0.47 },
-        { p: 0.25, u: 0.54, v: 0.48 },
-        { p: 0.26, u: 0.68, v: 0.48 },
-        { p: 0.26, u: 0.79, v: 0.49 },
-        { p: 0.26, u: 0.08, v: 0.61 },
-        { p: 0.28, u: 0.18, v: 0.57 },
-        { p: 0.28, u: 0.32, v: 0.60 },
-        { p: 0.29, u: 0.52, v: 0.59 },
-        { p: 0.29, u: 0.54, v: 0.60 },
-        { p: 0.30, u: 0.69, v: 0.59 },
-        { p: 0.30, u: 0.72, v: 0.59 },
-        { p: 0.31, u: 0.85, v: 0.60 },
-        { p: 0.31, u: 0.08, v: 0.72 },
-        { p: 0.32, u: 0.17, v: 0.73 },
-        { p: 0.32, u: 0.22, v: 0.74 },
-        { p: 0.33, u: 0.47, v: 0.71 },
-        { p: 0.33, u: 0.10, v: 0.86 },
-        { p: 0.34, u: 0.20, v: 0.84 },
-        { p: 0.34, u: 0.27, v: 0.84 },
-        { p: 0.35, u: 0.35, v: 0.84 },
-        { p: 0.35, u: 0.42, v: 0.86 },
-        { p: 0.35, u: 0.52, v: 0.83 },
-        { p: 0.35, u: 0.60, v: 0.82 },
-        { p: 0.36, u: 0.67, v: 0.85 },
-        { p: 0.36, u: 0.09, v: 0.96 },
-        { p: 0.37, u: 0.20, v: 0.94 },
-        { p: 0.37, u: 0.27, v: 0.96 },
-        { p: 0.37, u: 0.38, v: 0.95 },
-        { p: 0.37, u: 0.45, v: 0.96 },
-        { p: 0.38, u: 0.56, v: 0.93 }
+        // 1ª riga (alto)
+        { u: 0.08, v: 0.07 },
+        { u: 0.22, v: 0.07 },
+        { u: 0.29, v: 0.07 },
+        { u: 0.43, v: 0.07 },
+        { u: 0.51, v: 0.07 },
+        { u: 0.65, v: 0.07 },
+        { u: 0.72, v: 0.07 },
+        { u: 0.85, v: 0.07 },
+
+        // 2ª riga
+        { u: 0.08, v: 0.16 },
+        { u: 0.22, v: 0.16 },
+        { u: 0.29, v: 0.16 },
+        { u: 0.43, v: 0.16 },
+        { u: 0.57, v: 0.15 },
+        { u: 0.70, v: 0.15 },
+        { u: 0.84, v: 0.13 },
+
+        // 3ª riga
+        { u: 0.08, v: 0.26 },
+        { u: 0.22, v: 0.26 },
+        { u: 0.29, v: 0.27 },
+        { u: 0.43, v: 0.26 },
+        { u: 0.65, v: 0.27 },
+        { u: 0.85, v: 0.26 },
+
+        // 4ª riga
+        { u: 0.08, v: 0.35 },
+        { u: 0.23, v: 0.37 },
+        { u: 0.29, v: 0.36 },
+        { u: 0.43, v: 0.35 },
+        { u: 0.57, v: 0.34 },
+        { u: 0.70, v: 0.33 },
+        { u: 0.83, v: 0.32 },
+
+        // 5ª riga
+        { u: 0.08, v: 0.49 },
+        { u: 0.18, v: 0.45 },
+        { u: 0.32, v: 0.47 },
+        { u: 0.54, v: 0.48 },
+        { u: 0.68, v: 0.48 },
+        { u: 0.79, v: 0.49 },
+
+        // 6ª riga
+        { u: 0.08, v: 0.61 },
+        { u: 0.18, v: 0.57 },
+        { u: 0.32, v: 0.60 },
+        { u: 0.52, v: 0.59 },
+        { u: 0.69, v: 0.59 },
+        { u: 0.85, v: 0.60 },
+
+        // 7ª riga
+        { u: 0.08, v: 0.72 },
+        { u: 0.17, v: 0.73 },
+        { u: 0.22, v: 0.74 },
+        { u: 0.47, v: 0.71 },
+
+        // 8ª riga
+        { u: 0.10, v: 0.86 },
+        { u: 0.20, v: 0.84 },
+        { u: 0.27, v: 0.84 },
+        { u: 0.35, v: 0.84 },
+        { u: 0.42, v: 0.86 },
+        { u: 0.60, v: 0.82 },
+        { u: 0.67, v: 0.85 },
+
+        // 9ª riga (in fondo)
+        { u: 0.09, v: 0.96 },
+        { u: 0.20, v: 0.94 },
+        { u: 0.27, v: 0.96 },
+        { u: 0.38, v: 0.95 },
+        { u: 0.45, v: 0.96 },
+        { u: 0.56, v: 0.93 }
       ];
 
-      // Sarabanda – percorso semplice di base
+      // Sarabanda – per ora pochissime ancore semplici (puoi rifinirle dopo)
       let pathSarabanda = [
-        { p: 0.00, u: 0.10, v: 0.08 },
-        { p: 0.15, u: 0.20, v: 0.25 },
-        { p: 0.30, u: 0.30, v: 0.45 },
-        { p: 0.45, u: 0.45, v: 0.60 },
-        { p: 0.60, u: 0.60, v: 0.50 },
-        { p: 0.75, u: 0.75, v: 0.65 },
-        { p: 0.90, u: 0.88, v: 0.80 },
-        { p: 1.00, u: 0.92, v: 0.92 }
+        { u: 0.10, v: 0.08 },
+        { u: 0.30, v: 0.15 },
+        { u: 0.50, v: 0.22 },
+        { u: 0.70, v: 0.30 },
+        { u: 0.85, v: 0.40 },
+        { u: 0.70, v: 0.55 },
+        { u: 0.50, v: 0.70 },
+        { u: 0.30, v: 0.80 },
+        { u: 0.15, v: 0.90 }
       ];
 
       // ---------------------------------------------------------------------
@@ -293,18 +300,22 @@
       }
 
       // ---------------------------------------------------------------------
-      //  PALLINO – usa il tempo reale del brano
+      //  PALLINO – una figura alla volta
       // ---------------------------------------------------------------------
       function drawPointer(imgW, imgH) {
-        const t = currentTrack.currentTime();   // tempo corrente (secondi)
+        const t = currentTrack.currentTime();   // tempo corrente
         const d = currentTrack.duration();      // durata totale
-        if (!d || d <= 0) return;
+        if (!d || d <= 0 || !currentPath || currentPath.length === 0) return;
 
+        // progress 0..1 nel brano
         const progress = constrain(t / d, 0, 1);
 
-        const pos = getPositionAtProgress(progress, currentPath);
-        if (!pos) return;
+        // calcolo quale figura (ancora) devo mostrare
+        const n = currentPath.length;
+        let idx = floor(progress * n);
+        if (idx >= n) idx = n - 1;
 
+        const pos = currentPath[idx];
         const imgX = width / 2 - imgW / 2;
         const imgY = height / 2 - imgH / 2;
         const x = imgX + pos.u * imgW;
@@ -324,31 +335,6 @@
 
         fill(red(col), green(col), blue(col), 70);
         ellipse(x, y, r * 3.2);
-      }
-
-      // ---------------------------------------------------------------------
-      //  POSIZIONE (u,v) SENZA DIAGONALI: teletrasporto da punto a punto
-      // ---------------------------------------------------------------------
-      function getPositionAtProgress(p, path) {
-        if (!path || path.length === 0) return null;
-
-        // Prima del primo punto → resta sul primo
-        if (p <= path[0].p) {
-          return { u: path[0].u, v: path[0].v };
-        }
-
-        // Trova l'ULTIMO punto con p_i <= p
-        let idx = 0;
-        for (let i = 1; i < path.length; i++) {
-          if (p >= path[i].p) {
-            idx = i;
-          } else {
-            break;
-          }
-        }
-
-        // Nessuna interpolazione: usa esattamente quel punto
-        return { u: path[idx].u, v: path[idx].v };
       }
 
       // ---------------------------------------------------------------------
@@ -406,7 +392,7 @@
       }
 
       // ---------------------------------------------------------------------
-      //  REGISTRAZIONE PERCORSO (clic → console)
+      //  REGISTRAZIONE PERCORSO (clic → console, se in futuro vorrai rifinirlo)
       // ---------------------------------------------------------------------
       function mousePressed() {
         if (!currentTrack || !currentImg) return;
@@ -435,7 +421,9 @@
 
         console.log(
           "Aggiungi punto:",
-          `{ p: ${p.toFixed(2)}, u: ${u.toFixed(2)}, v: ${v.toFixed(2)} },`
+          `{ u: ${u.toFixed(2)}, v: ${v.toFixed(2)} }, progress ≈ ${p.toFixed(
+            2
+          )}`
         );
       }
 
@@ -455,8 +443,6 @@
     </script>
   </body>
 </html>
-
-
 
 
 
