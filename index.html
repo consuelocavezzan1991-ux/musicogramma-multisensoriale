@@ -256,17 +256,33 @@
       }
 
       // ---------------------------------------------------------------------
-      //  PALLINO – usa il tempo reale, ma salta di punto in punto (niente diagonali)
+      //  PALLINO – velocizzato e visibile solo all'inizio di ogni figura
       // ---------------------------------------------------------------------
       function drawPointer(imgW, imgH) {
         const t = currentTrack.currentTime();   // tempo corrente (secondi)
         const d = currentTrack.duration();      // durata totale
         if (!d || d <= 0 || !currentPath || currentPath.length === 0) return;
 
-        const progress = constrain(t / d, 0, 1);  // 0..1
+        // progress reale del brano
+        const baseProgress = constrain(t / d, 0, 1);
 
-        const pos = getPositionAtProgress(progress, currentPath);
+        // per Danza delle ore acceleriamo un po' il percorso
+        let pathProgress;
+        if (currentTrack === danzaAudio) {
+          const speedFactor = 1.8; // >1 = più veloce; puoi provare 1.6–2.0
+          pathProgress = constrain(baseProgress * speedFactor, 0, 1);
+        } else {
+          pathProgress = baseProgress;
+        }
+
+        const pos = getPositionAtProgress(pathProgress, currentPath);
         if (!pos) return;
+
+        // visibile SOLO all'inizio di ogni figura: finestrella di tempo
+        const windowWidth = 0.015; // 1.5% del brano circa
+        if (pathProgress < pos.p || pathProgress > pos.p + windowWidth) {
+          return; // fuori dalla "finestra": non disegno il pallino
+        }
 
         const imgX = width / 2 - imgW / 2;
         const imgY = height / 2 - imgH / 2;
@@ -290,15 +306,15 @@
       }
 
       // ---------------------------------------------------------------------
-      //  POSIZIONE (u,v) SENZA INTERPOLAZIONE:
-      //  sceglie l'ULTIMO punto con p_i <= progress → teletrasporto figura per figura
+      //  POSIZIONE (u,v) – sceglie l'ULTIMO punto con p_i <= progress
+      //  e restituisce anche p_i per la finestra di visibilità
       // ---------------------------------------------------------------------
       function getPositionAtProgress(p, path) {
         if (!path || path.length === 0) return null;
 
         // prima del primo punto → resta sul primo
         if (p <= path[0].p) {
-          return { u: path[0].u, v: path[0].v };
+          return { u: path[0].u, v: path[0].v, p: path[0].p };
         }
 
         let idx = 0;
@@ -310,7 +326,7 @@
           }
         }
 
-        return { u: path[idx].u, v: path[idx].v };
+        return { u: path[idx].u, v: path[idx].v, p: path[idx].p };
       }
 
       // ---------------------------------------------------------------------
