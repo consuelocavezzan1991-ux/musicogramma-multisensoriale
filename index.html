@@ -142,25 +142,20 @@
       ];
 
       // Durate relative (pesi)
-      // 9, 19, 21 un po' più lunghe (2)
-      // 20, 22 ancora più lunghe (4)
-      // Durate relative (pesi)
-// 9 leggermente più veloce (1.5)
-// 19, 21 = 2
-// 20, 22 = 4
-const durationsDanza = [
-  1, 1, 1, 1,   // 1–4
-  1, 1, 1, 1,   // 5–8
-  1.5,          // 9 (più veloce)
-  1, 1, 1, 1,   // 10–13
-  1, 1, 1, 1, 1,// 14–18
-  2,            // 19
-  4,            // 20
-  2,            // 21
-  4,            // 22
-  1, 1, 1, 1, 1, 1, 1, 1, 1 // 23–31
-];
-
+      // 9, 19, 21 = 2 (un po' più lunghe)
+      // 20, 22 = 4 (le più lunghe)
+      const durationsDanza = [
+        1, 1, 1, 1,   // 1–4
+        1, 1, 1, 1,   // 5–8
+        2,            // 9
+        1, 1, 1, 1,   // 10–13
+        1, 1, 1, 1, 1,// 14–18
+        2,            // 19
+        4,            // 20
+        2,            // 21
+        4,            // 22
+        1, 1, 1, 1, 1, 1, 1, 1, 1 // 23–31
+      ];
 
       // -------------------------------------------------------------
       //  SARABANDA (semplice, tutte uguali)
@@ -328,7 +323,7 @@ const durationsDanza = [
           currentDurations = durationsDanza;
 
           // velocità globale del pallino per "Danza"
-          speedFactor = 2.75;
+          speedFactor = 2.8;
           startHold = 0.6;
         } else {
           currentTrack = sarabandaAudio;
@@ -385,13 +380,6 @@ const durationsDanza = [
     </script>
   </body>
 </html>
-
-
-
-
-
-
-
 
 
 
