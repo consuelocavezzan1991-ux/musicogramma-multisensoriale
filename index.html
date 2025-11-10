@@ -198,10 +198,10 @@
           .addEventListener("click", () => selectTrack("sarabanda"));
         document
           .getElementById("btn-play")
-          .addEventListener("click", togglePlayPause);
+          .addEventListener("click", () => togglePlayPause());
         document
           .getElementById("btn-stop")
-          .addEventListener("click", stopTrack);
+          .addEventListener("click", () => stopTrack());
 
         setStatus("Pronto. Seleziona un brano e poi premi Play.");
       }
@@ -269,7 +269,7 @@
 
         // fattore di velocità per Danza (più alto = più veloce)
         if (currentTrack === danzaAudio) {
-          const speedFactor = 6.0; // leggermente più avanti della musica
+          const speedFactor = 5.7; // regolato per stare quasi in sincro
           progress = constrain(progress * speedFactor, 0, 1);
         }
 
@@ -368,6 +368,7 @@
     </script>
   </body>
 </html>
+
 
 
 
