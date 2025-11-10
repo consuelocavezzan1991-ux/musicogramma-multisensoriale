@@ -95,7 +95,6 @@
 
     <div id="canvas-container"></div>
 
-    <!-- p5.js + p5.sound -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.sound.min.js"></script>
 
@@ -108,68 +107,59 @@
       let currentName = "";
       let currentPath = null;
 
-      // offset percentuale sulla timeline: negativo = pallino in anticipo
-      let leadPercent = 0.0;
-
-      // fattore di velocità: >1 = pallino si muove più veloce della musica
-      let speedFactor = 1.0;
+      let syncFactor = 1.0;
+      let leadSeconds = 0.0;
 
       // -------------------------------------------------------------
       //  PUNTI DANZA DELLE ORE
       // -------------------------------------------------------------
       const pathDanza = [
         { u: 0.08, v: 0.07 },
-        { u: 0.3, v: 0.07 },
-        { u: 0.5, v: 0.07 },
+        { u: 0.30, v: 0.07 },
+        { u: 0.50, v: 0.07 },
         { u: 0.72, v: 0.07 },
         { u: 0.08, v: 0.16 },
         { u: 0.29, v: 0.16 },
-        { u: 0.5, v: 0.13 },
+        { u: 0.50, v: 0.13 },
         { u: 0.63, v: 0.14 },
         { u: 0.75, v: 0.16 },
         { u: 0.08, v: 0.26 },
         { u: 0.29, v: 0.26 },
-        { u: 0.5, v: 0.26 },
+        { u: 0.50, v: 0.26 },
         { u: 0.72, v: 0.27 },
         { u: 0.08, v: 0.36 },
         { u: 0.29, v: 0.35 },
-        { u: 0.5, v: 0.33 },
+        { u: 0.50, v: 0.33 },
         { u: 0.63, v: 0.34 },
         { u: 0.76, v: 0.33 },
         { u: 0.08, v: 0.49 },
         { u: 0.32, v: 0.48 },
         { u: 0.08, v: 0.61 },
-        { u: 0.32, v: 0.6 },
+        { u: 0.32, v: 0.60 },
         { u: 0.08, v: 0.72 },
         { u: 0.23, v: 0.74 },
         { u: 0.09, v: 0.86 },
         { u: 0.28, v: 0.84 },
         { u: 0.42, v: 0.85 },
-        { u: 0.6, v: 0.84 },
-        { u: 0.1, v: 0.96 },
+        { u: 0.60, v: 0.84 },
+        { u: 0.10, v: 0.96 },
         { u: 0.28, v: 0.96 },
         { u: 0.45, v: 0.96 }
       ];
 
-      // -------------------------------------------------------------
-      //  PUNTI SEMPLICI PER SARABANDA
-      // -------------------------------------------------------------
       const pathSarabanda = [
-        { u: 0.1, v: 0.1 },
-        { u: 0.25, v: 0.2 },
-        { u: 0.4, v: 0.3 },
-        { u: 0.55, v: 0.4 },
-        { u: 0.7, v: 0.5 },
-        { u: 0.8, v: 0.6 },
-        { u: 0.7, v: 0.7 },
-        { u: 0.55, v: 0.8 },
-        { u: 0.4, v: 0.88 },
+        { u: 0.10, v: 0.10 },
+        { u: 0.25, v: 0.20 },
+        { u: 0.40, v: 0.30 },
+        { u: 0.55, v: 0.40 },
+        { u: 0.70, v: 0.50 },
+        { u: 0.80, v: 0.60 },
+        { u: 0.70, v: 0.70 },
+        { u: 0.55, v: 0.80 },
+        { u: 0.40, v: 0.88 },
         { u: 0.25, v: 0.92 }
       ];
 
-      // -------------------------------------------------------------
-      //  PRELOAD
-      // -------------------------------------------------------------
       function preload() {
         danzaAudio = loadSound("danza.mp3");
         sarabandaAudio = loadSound("sarabanda.mp3");
@@ -177,202 +167,117 @@
         sarabandaImg = loadImage("sarabanda_musicogramma.png");
       }
 
-      // -------------------------------------------------------------
-      //  SETUP
-      // -------------------------------------------------------------
       function setup() {
         const canvas = createCanvas(900, 600);
         canvas.parent("canvas-container");
-
         textAlign(CENTER, CENTER);
         textSize(18);
 
-        document
-          .getElementById("btn-danza")
-          .addEventListener("click", () => selectTrack("danza"));
-
-        document
-          .getElementById("btn-sarabanda")
-          .addEventListener("click", () => selectTrack("sarabanda"));
-
-        document
-          .getElementById("btn-play")
-          .addEventListener("click", togglePlayPause);
-
+        document.getElementById("btn-danza").addEventListener("click", () => selectTrack("danza"));
+        document.getElementById("btn-sarabanda").addEventListener("click", () => selectTrack("sarabanda"));
+        document.getElementById("btn-play").addEventListener("click", togglePlayPause);
         document.getElementById("btn-stop").addEventListener("click", stopTrack);
       }
 
-      // -------------------------------------------------------------
-      //  DRAW
-      // -------------------------------------------------------------
       function draw() {
         background(244);
 
         if (!currentTrack || !currentImg) {
           fill(80);
-          textSize(22);
-          text(
-            "Seleziona un brano per vedere il musicogramma",
-            width / 2,
-            height / 2
-          );
+          text("Seleziona un brano per vedere il musicogramma", width / 2, height / 2);
           return;
         }
 
-        imageMode(CENTER);
         const imgW = width * 0.8;
         const imgH = height * 0.8;
-
-        // bordo bianco
+        imageMode(CENTER);
         fill(255);
         noStroke();
         rectMode(CENTER);
         rect(width / 2, height / 2, imgW + 8, imgH + 8, 18);
-
-        // musicogramma
         image(currentImg, width / 2, height / 2, imgW, imgH);
 
-        // testi
-        fill(20);
-        noStroke();
-        textSize(26);
-        text(currentName, width / 2, 30);
-
-        textSize(14);
-        if (currentTrack.isPlaying()) {
-          fill(40, 160, 90);
-          text("In riproduzione – segui il pallino con il dito", width / 2, 60);
-        } else {
-          fill(120);
-          text("Brano in pausa – premi Play per ascoltare", width / 2, 60);
-        }
-
-        if (currentTrack.isPlaying() && currentPath) {
-          drawPointer(imgW, imgH);
-        }
+        if (currentTrack.isPlaying()) drawPointer(imgW, imgH);
       }
 
-      // -------------------------------------------------------------
-      //  PALLINO – percentuale * velocità + anticipo
-      // -------------------------------------------------------------
+      // -------------------  CORRETTORE PARTENZA ---------------------
+      let startHold = 0.6; // tempo in secondi in cui resta sulla prima figura
+
       function drawPointer(imgW, imgH) {
         const t = currentTrack.currentTime();
         const d = currentTrack.duration();
-        if (!d || d <= 0 || !currentPath || currentPath.length === 0) return;
+        if (!d || !currentPath) return;
 
         const n = currentPath.length;
 
-        // percentuale di avanzamento del brano
-        let progress = (t / d) * speedFactor; // velocità regolabile
+        // se siamo nei primi 0.6s: resta fermo sulla prima figura
+        if (t < startHold) {
+          drawDot(currentPath[0], imgW, imgH);
+          return;
+        }
 
-        // piccolo anticipo/ritardo fine
-        progress += leadPercent;
+        // stesso calcolo che "andava bene"
+        const virtualDuration = d / syncFactor;
+        const step = virtualDuration / n;
+        let tAdjusted = t + leadSeconds;
+        if (tAdjusted > d) tAdjusted = d;
+        let idx = Math.floor(tAdjusted / step);
+        if (idx >= n) idx = n - 1;
 
-        // limitiamo tra 0 e poco meno di 1
-        if (progress < 0) progress = 0;
-        if (progress > 0.999) progress = 0.999;
+        drawDot(currentPath[idx], imgW, imgH);
+      }
 
-        const idx = Math.floor(progress * n);
-        const pos = currentPath[idx];
-
-        // coordinate dell'immagine
+      function drawDot(pos, imgW, imgH) {
         const imgX = width / 2 - imgW / 2;
         const imgY = height / 2 - imgH / 2;
         const x = imgX + pos.u * imgW;
         const y = imgY + pos.v * imgH;
-
-        // effetto pallino pulsante
         const baseSize = 22;
         const pulse = 4 * sin(frameCount * 0.25);
         const r = baseSize + pulse;
-
         noStroke();
-        const col =
-          currentTrack === danzaAudio
-            ? color(0, 140, 255, 220)
-            : color(255, 80, 150, 220);
-
-        fill(col);
+        fill(0, 140, 255, 220);
         ellipse(x, y, r * 2);
-
-        fill(red(col), green(col), blue(col), 70);
+        fill(0, 140, 255, 70);
         ellipse(x, y, r * 3.2);
       }
 
-      // -------------------------------------------------------------
-      //  GESTIONE BRANI
-      // -------------------------------------------------------------
       function selectTrack(name) {
         stopTrack();
-
         if (name === "danza") {
           currentTrack = danzaAudio;
           currentImg = danzaImg;
           currentName = "Danza delle ore";
           currentPath = pathDanza;
-
-          // QUI ho messo valori per:
-          // - velocità simile a prima (più veloce della musica)
-          // - anticipo piccolo
-          speedFactor = 3.0;   // se è troppo veloce, prova 2.5
-          leadPercent = -0.02; // se è leggermente in ritardo, fai -0.03
-        } else if (name === "sarabanda") {
+          syncFactor = 3.0;      // come la versione “perfetta”
+          leadSeconds = 4.0;     // stesso anticipo
+        } else {
           currentTrack = sarabandaAudio;
           currentImg = sarabandaImg;
           currentName = "Sarabanda";
           currentPath = pathSarabanda;
-
-          speedFactor = 1.5;
-          leadPercent = -0.01;
+          syncFactor = 1.0;
+          leadSeconds = 0.5;
         }
-
-        setStatus(
-          `Brano selezionato: ${currentName}. Premi "Play" per avviare.`
-        );
+        document.getElementById("status").textContent =
+          `Brano selezionato: ${currentName}. Premi "Play" per avviare.`;
       }
 
       function togglePlayPause() {
-        if (!currentTrack) {
-          setStatus("Seleziona prima un brano.");
-          return;
-        }
-
+        if (!currentTrack) return;
         userStartAudio().then(() => {
-          if (!currentTrack.isPlaying()) {
-            currentTrack.play();
-            setStatus(`Riproduzione di: ${currentName}`);
-          } else {
-            currentTrack.pause();
-            setStatus(`Brano in pausa: ${currentName}`);
-          }
+          currentTrack.isPlaying() ? currentTrack.pause() : currentTrack.play();
         });
       }
 
       function stopTrack() {
-        if (danzaAudio && danzaAudio.isPlaying()) danzaAudio.stop();
-        if (sarabandaAudio && sarabandaAudio.isPlaying()) sarabandaAudio.stop();
-        setStatus("Riproduzione interrotta.");
-      }
-
-      function setStatus(msg) {
-        const el = document.getElementById("status");
-        if (el) el.textContent = msg;
-      }
-
-      // TASTIERA: spazio = Play/Pausa, S = Stop
-      function keyPressed() {
-        if (key === " ") {
-          togglePlayPause();
-          return false;
-        }
-        if (key === "s" || key === "S") {
-          stopTrack();
-          return false;
-        }
+        if (danzaAudio.isPlaying()) danzaAudio.stop();
+        if (sarabandaAudio.isPlaying()) sarabandaAudio.stop();
       }
     </script>
   </body>
 </html>
+
 
 
 
