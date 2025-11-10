@@ -265,15 +265,15 @@
 
         const tEff = t - startHold;
 
-        // tempo normalizzato (0..1) con un leggero fattore di velocità
+        // tempo normalizzato (0..1) con fattore di velocità
         let tNorm = (tEff / d) * speedFactor;
         if (tNorm < 0) tNorm = 0;
         if (tNorm > 0.999) tNorm = 0.999;
 
         const totalWeight = currentDurations.reduce((a, b) => a + b, 0);
-        const target = tNorm * totalWeight; // posizione nella "linea dei pesi"
+        const target = tNorm * totalWeight; // posizione sulla "linea dei pesi"
 
-        // trova a che figura corrisponde questo punto nella somma cumulativa
+        // trova in quale figura cade questo punto
         let cum = 0;
         let idx = n - 1;
         for (let i = 0; i < currentDurations.length; i++) {
@@ -322,8 +322,8 @@
           currentPath = pathDanza;
           currentDurations = durationsDanza;
 
-          // leggermente più veloce della musica, ma non "impazzito"
-          speedFactor = 1.05;
+          // leggermente più veloce della musica
+          speedFactor = 1.02;
           startHold = 0.6;
         } else {
           currentTrack = sarabandaAudio;
@@ -332,7 +332,7 @@
           currentPath = pathSarabanda;
           currentDurations = durationsSarabanda;
 
-          // per Sarabanda lo teniamo uguale alla musica
+          // uguale alla musica
           speedFactor = 1.0;
           startHold = 0.5;
         }
