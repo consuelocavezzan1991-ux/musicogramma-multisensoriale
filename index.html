@@ -196,11 +196,11 @@
 
         document
           .getElementById("btn-play")
-          .addEventListener("click", togglePlayPause);
+          .addEventListener("click", () => togglePlayPause);
 
         document
           .getElementById("btn-stop")
-          .addEventListener("click", stopTrack);
+          .addEventListener("click", () => stopTrack);
 
         setStatus("Pronto. Seleziona un brano e poi premi Play.");
       }
@@ -256,7 +256,7 @@
       }
 
       // ---------------------------------------------------------------------
-      //  PALLINO – velocizzato e visibile solo all'inizio di ogni figura
+      //  PALLINO – leggermente anticipato e visibile solo all'inizio di ogni figura
       // ---------------------------------------------------------------------
       function drawPointer(imgW, imgH) {
         const t = currentTrack.currentTime();   // tempo corrente (secondi)
@@ -266,11 +266,11 @@
         // progress reale del brano
         const baseProgress = constrain(t / d, 0, 1);
 
-        // per Danza delle ore acceleriamo un po' il percorso
+        // per Danza delle ore: leggero anticipo, niente compressione
         let pathProgress;
         if (currentTrack === danzaAudio) {
-          const speedFactor = 1.8; // >1 = più veloce; puoi provare 1.6–2.0
-          pathProgress = constrain(baseProgress * speedFactor, 0, 1);
+          const offset = 0.02; // anticipo di circa il 2% del brano
+          pathProgress = constrain(baseProgress + offset, 0, 1);
         } else {
           pathProgress = baseProgress;
         }
@@ -278,10 +278,10 @@
         const pos = getPositionAtProgress(pathProgress, currentPath);
         if (!pos) return;
 
-        // visibile SOLO all'inizio di ogni figura: finestrella di tempo
-        const windowWidth = 0.015; // 1.5% del brano circa
+        // visibile SOLO all'inizio di ogni figura: piccola finestra dopo p
+        const windowWidth = 0.02; // 2% del brano
         if (pathProgress < pos.p || pathProgress > pos.p + windowWidth) {
-          return; // fuori dalla "finestra": non disegno il pallino
+          return; // fuori dalla finestra → non disegno il pallino
         }
 
         const imgX = width / 2 - imgW / 2;
@@ -435,6 +435,7 @@
     </script>
   </body>
 </html>
+
 
 
 
