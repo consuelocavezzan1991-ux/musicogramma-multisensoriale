@@ -99,13 +99,10 @@
       let currentPath = null;
       let currentDurations = null;
 
-      // per Sarabanda / generico
+      // fattore velocità globale (1 = segue esattamente la musica)
       let speedFactor = 1.0;
+      // tempo in secondi in cui il pallino resta sulla prima figura
       let startHold = 0.0;
-
-      // per Danza: tempo "virtuale" totale che il pallino usa
-      // -> cambialo se è un po' veloce / lento
-      const danzaVirtualTotal = 85.0; // secondi per fare tutte e 31 le figure
 
       // -------------------------------------------------------------
       //  PUNTI DANZA DELLE ORE (31 figure)
@@ -144,7 +141,10 @@
         { u: 0.45, v: 0.96 }  // 31
       ];
 
-      // Durate relative per Danza (dai secondi che mi hai dato)
+      // -------------------------------------------------------------
+      //  DURATE RELATIVE FIGURE DANZA (da te misurate sul video)
+      //  Ogni valore = end - start
+      // -------------------------------------------------------------
       const durationsDanza = [
         0.01, // 1: 0.00 -> 0.01
         0.01, // 2: 0.02 -> 0.03
@@ -180,7 +180,7 @@
       ];
 
       // -------------------------------------------------------------
-      //  SARABANDA (semplice)
+      //  SARABANDA (semplice, tutte uguali)
       // -------------------------------------------------------------
       const pathSarabanda = [
         { u: 0.1, v: 0.1 },
@@ -264,63 +264,27 @@
         text(currentName, width / 2, 30);
 
         if (currentTrack && currentTrack.isPlaying() && currentPath && currentDurations) {
-          if (currentTrack === danzaAudio) {
-            drawPointerDanza(imgW, imgH);
-          } else {
-            drawPointerGeneric(imgW, imgH);
-          }
+          drawPointer(imgW, imgH);
         }
       }
 
       // -------------------------------------------------------------
-      //  PALLINO – DANZA (usa durata virtuale fissa)
+      //  PALLINO – usa le durate relative (Danza: dal video, Sarabanda: uniformi)
       // -------------------------------------------------------------
-      function drawPointerDanza(imgW, imgH) {
-        const t = currentTrack.currentTime(); // tempo reale dell'audio
-
-        // fermo iniziale se vuoi (per ora no)
-        if (t < startHold) {
-          drawDot(pathDanza[0], imgW, imgH);
-          return;
-        }
-
-        const tEff = t - startHold;
-
-        // progressione (0..1) rispetto a una durata VIRTUALE fissa
-        let progress = tEff / danzaVirtualTotal;
-        if (progress < 0) progress = 0;
-        if (progress > 0.999) progress = 0.999;
-
-        const totalWeight = durationsDanza.reduce((a, b) => a + b, 0);
-        const target = progress * totalWeight;
-
-        let cum = 0;
-        let idx = pathDanza.length - 1;
-        for (let i = 0; i < durationsDanza.length; i++) {
-          cum += durationsDanza[i];
-          if (target <= cum) {
-            idx = i;
-            break;
-          }
-        }
-
-        drawDot(pathDanza[idx], imgW, imgH);
-      }
-
-      // -------------------------------------------------------------
-      //  PALLINO – GENERICO (Sarabanda)
-      // -------------------------------------------------------------
-      function drawPointerGeneric(imgW, imgH) {
+      function drawPointer(imgW, imgH) {
         const t = currentTrack.currentTime();
         const d = currentTrack.duration();
         if (!d) return;
 
+        // fermo iniziale, se previsto
         if (t < startHold) {
           drawDot(currentPath[0], imgW, imgH);
           return;
         }
 
         const tEff = t - startHold;
+
+        // progressione 0..1 nel brano, con piccolo fattore di velocità
         let progress = (tEff / d) * speedFactor;
         if (progress < 0) progress = 0;
         if (progress > 0.999) progress = 0.999;
@@ -376,9 +340,9 @@
           currentPath = pathDanza;
           currentDurations = durationsDanza;
 
-          // Danza: tempo virtuale fisso, non usiamo speedFactor
-          speedFactor = 1.0;
-          startHold = 0.0;
+          // qui regoli solo la velocità globale di Danza
+          speedFactor = 1.05; // se rallenta troppo, prova 1.06–1.08
+          startHold = 0.0;    // parte subito
         } else {
           currentTrack = sarabandaAudio;
           currentImg = sarabandaImg;
@@ -434,14 +398,6 @@
     </script>
   </body>
 </html>
-
-
-
-
-
-
-
-
 
 
 
