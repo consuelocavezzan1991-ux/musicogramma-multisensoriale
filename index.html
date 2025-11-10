@@ -99,11 +99,9 @@
       let currentPath = null;
       let currentDurations = null;
 
-      // fattore di velocità globale (1 = uguale alla musica)
+      // solo per Sarabanda (Danza ora usa i tempi reali)
       let speedFactor = 1.0;
-
-      // quanto resta fermo sulla prima figura all'inizio
-      let startHold = 0.6;
+      let startHold = 0.0; // per Danza lo mettiamo a 0
 
       // -------------------------------------------------------------
       //  PUNTI DANZA DELLE ORE
@@ -142,21 +140,78 @@
         { u: 0.45, v: 0.96 }  // 31
       ];
 
-      // Durate relative (pesi)
-      // 9, 19, 21 = 2   (un po' più lunghe)
-      // 20, 22 = 4      (le più lunghe)
-      const durationsDanza = [
-        1, 1, 1, 1,   // 1–4
-        1, 1, 1, 1,   // 5–8
-        2,            // 9
-        1, 1, 1, 1,   // 10–13
-        1, 1, 1, 1, 1,// 14–18
-        2,            // 19
-        4,            // 20
-        2,            // 21
-        4,            // 22
-        1, 1, 1, 1, 1, 1, 1, 1, 1 // 23–31
+      // Tempi REALI (secondi) che hai misurato dal video per Danza
+      // 1..31 (abbiamo saltato solo il buco "21" che avevi scritto, ma ci sono comunque 31 figure)
+      const danzaStartTimes = [
+        0.00, // 1
+        0.02, // 2
+        0.03, // 3
+        0.04, // 4
+        0.06, // 5
+        0.09, // 6
+        0.10, // 7
+        0.11, // 8
+        0.12, // 9
+        0.14, // 10
+        0.16, // 11
+        0.17, // 12
+        0.19, // 13
+        0.21, // 14
+        0.23, // 15
+        0.25, // 16
+        0.26, // 17
+        0.27, // 18
+        0.29, // 19
+        0.32, // 20
+        0.36, // 21 (il tuo "22")
+        0.39, // 22 (il tuo "23")
+        0.44, // 23
+        0.45, // 24
+        0.46, // 25
+        0.47, // 26
+        0.48, // 27
+        0.49, // 28
+        0.50, // 29
+        0.51, // 30
+        0.52  // 31
       ];
+
+      const danzaEndTimes = [
+        0.01, // 1
+        0.03, // 2
+        0.04, // 3
+        0.06, // 4
+        0.08, // 5
+        0.10, // 6
+        0.11, // 7
+        0.12, // 8
+        0.14, // 9
+        0.16, // 10
+        0.17, // 11
+        0.19, // 12
+        0.21, // 13
+        0.23, // 14
+        0.25, // 15
+        0.26, // 16
+        0.27, // 17
+        0.28, // 18
+        0.32, // 19
+        0.36, // 20
+        0.39, // 21
+        0.44, // 22
+        0.45, // 23
+        0.46, // 24
+        0.47, // 25
+        0.48, // 26
+        0.49, // 27
+        0.50, // 28
+        0.51, // 29
+        0.52, // 30
+        0.53  // 31
+      ];
+
+      // eventuale piccolo offset se l'mp3 parte un filo prima/dopo del video
+      const danzaOffset = 0.0; // se serve, puoi provare 0.02, 0.03, ecc.
 
       // -------------------------------------------------------------
       //  SARABANDA (semplice, tutte uguali)
@@ -202,7 +257,7 @@
           .addEventListener("click", () => selectTrack("sarabanda"));
         document
           .getElementById("btn-play")
-          .addEventListener("click", () => togglePlayPause);
+          .addEventListener("click", togglePlayPause);
         document
           .getElementById("btn-stop")
           .addEventListener("click", stopTrack);
@@ -242,22 +297,51 @@
         textSize(20);
         text(currentName, width / 2, 30);
 
-        if (currentTrack.isPlaying() && currentPath && currentDurations) {
-          drawPointer(imgW, imgH);
+        if (currentTrack.isPlaying() && currentPath) {
+          if (currentTrack === danzaAudio) {
+            drawPointerDanza(imgW, imgH);
+          } else {
+            drawPointerGeneric(imgW, imgH);
+          }
         }
       }
 
       // -------------------------------------------------------------
-      //  PALLINO – mappa il tempo del brano sui pesi
+      //  PALLINO – DANZA DELLE ORE (usa i tempi reali)
       // -------------------------------------------------------------
-      function drawPointer(imgW, imgH) {
+      function drawPointerDanza(imgW, imgH) {
+        const t = currentTrack.currentTime() + danzaOffset;
+        const n = pathDanza.length;
+
+        let idx = n - 1;
+
+        if (t <= danzaStartTimes[0]) {
+          idx = 0;
+        } else if (t >= danzaEndTimes[n - 1]) {
+          idx = n - 1;
+        } else {
+          for (let i = 0; i < n; i++) {
+            if (t >= danzaStartTimes[i] && t < danzaEndTimes[i]) {
+              idx = i;
+              break;
+            }
+          }
+        }
+
+        drawDot(pathDanza[idx], imgW, imgH);
+      }
+
+      // -------------------------------------------------------------
+      //  PALLINO – GENERICO (Sarabanda, semplice con durate uguali)
+      // -------------------------------------------------------------
+      function drawPointerGeneric(imgW, imgH) {
         const t = currentTrack.currentTime();
         const d = currentTrack.duration();
         if (!d || !currentPath || !currentDurations) return;
 
         const n = currentPath.length;
 
-        // resta un attimo sulla prima figura
+        // leggera attesa sulla prima figura
         if (t < startHold) {
           drawDot(currentPath[0], imgW, imgH);
           return;
@@ -265,15 +349,13 @@
 
         const tEff = t - startHold;
 
-        // tempo normalizzato (0..1) con fattore di velocità
         let tNorm = (tEff / d) * speedFactor;
         if (tNorm < 0) tNorm = 0;
         if (tNorm > 0.999) tNorm = 0.999;
 
         const totalWeight = currentDurations.reduce((a, b) => a + b, 0);
-        const target = tNorm * totalWeight; // posizione sulla "linea dei pesi"
+        const target = tNorm * totalWeight;
 
-        // trova in quale figura cade questo punto
         let cum = 0;
         let idx = n - 1;
         for (let i = 0; i < currentDurations.length; i++) {
@@ -283,9 +365,6 @@
             break;
           }
         }
-
-        if (idx < 0) idx = 0;
-        if (idx >= n) idx = n - 1;
 
         drawDot(currentPath[idx], imgW, imgH);
       }
@@ -320,19 +399,15 @@
           currentImg = danzaImg;
           currentName = "Danza delle ore";
           currentPath = pathDanza;
-          currentDurations = durationsDanza;
-
-          // più veloce della musica per allinearsi meglio
-          speedFactor = 2.3;
-          startHold = 0.3;
+          currentDurations = null; // NON usiamo più i pesi
+          speedFactor = 1.0;
+          startHold = 0.0; // parte subito con i tuoi tempi
         } else {
           currentTrack = sarabandaAudio;
           currentImg = sarabandaImg;
           currentName = "Sarabanda";
           currentPath = pathSarabanda;
           currentDurations = durationsSarabanda;
-
-          // uguale alla musica
           speedFactor = 1.0;
           startHold = 0.5;
         }
@@ -381,14 +456,6 @@
     </script>
   </body>
 </html>
-
-
-
-
-
-
-
-
 
 
 
