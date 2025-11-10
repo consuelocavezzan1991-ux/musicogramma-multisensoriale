@@ -1,20 +1,21 @@
 let danzaAudio, sarabandaAudio;
 let danzaImg, sarabandaImg;
 
-let currentTrack = null;   // puntatore al brano selezionato
+let currentTrack = null;   // brano selezionato
 let currentImg = null;     // immagine del musicogramma
-let currentName = "";      // nome brano per il testo
+let currentName = "";      // nome brano
 
 let currentPath = null;    // percorso attivo per il pallino
 
 // ---------------------------------------------------------------------
-//  PERCORSI DEL PALLINO (da vedere come bozza già funzionante)
+//  PERCORSI DEL PALLINO
 //  p = progressione (0 inizio brano, 1 fine brano)
 //  u = orizzontale (0 sinistra, 1 destra)
 //  v = verticale   (0 alto,    1 basso)
+//  → puoi lasciarli così, funzionano già; se vorrai, li potrai rifinire
 // ---------------------------------------------------------------------
 
-// Danza delle ore – percorso curvo che parte dall’alto e si muove a S
+// Danza delle ore – parte dall'alto, scende e fa una S
 let pathDanza = [
   { p: 0.00, u: 0.50, v: 0.05 }, // in alto al centro
   { p: 0.12, u: 0.30, v: 0.18 },
@@ -27,7 +28,7 @@ let pathDanza = [
   { p: 1.00, u: 0.50, v: 0.90 }  // in basso al centro
 ];
 
-// Sarabanda – percorso più “a onda” da sinistra verso destra
+// Sarabanda – parte in alto a sinistra, va verso destra a onda
 let pathSarabanda = [
   { p: 0.00, u: 0.10, v: 0.08 }, // in alto a sinistra
   { p: 0.15, u: 0.20, v: 0.25 },
@@ -43,11 +44,10 @@ let pathSarabanda = [
 //  PRELOAD: carico audio + immagini
 // ---------------------------------------------------------------------
 function preload() {
-  // rinomina i file audio come li hai nel repository, se diversi
+  // nomi dei file (devono essere esattamente questi nella cartella)
   danzaAudio = loadSound("danza.mp3");
   sarabandaAudio = loadSound("sarabanda.mp3");
 
-  // immagini dei musicogrammi
   danzaImg = loadImage("danza_musicogramma.png");
   sarabandaImg = loadImage("sarabanda_musicogramma.png");
 }
@@ -92,10 +92,12 @@ function draw() {
     return;
   }
 
-  // Disegno il riquadro bianco del musicogramma
+  // Dimensioni del riquadro del musicogramma
   imageMode(CENTER);
   const imgW = width * 0.8;
   const imgH = height * 0.8;
+
+  // Bordo bianco con angoli arrotondati
   fill(255);
   noStroke();
   rectMode(CENTER);
@@ -257,9 +259,9 @@ function setStatus(msg) {
 }
 
 // ---------------------------------------------------------------------
-//  (OPZIONALE) CATTURARE COORDINATE PER FARE UN PERCORSO PIÙ PRECISO
-//  Se clicchi dentro il musicogramma mentre suona, puoi leggere in console
-//  il progress, u e v e poi metterli nei path qui sopra.
+//  (OPZIONALE) AIUTO PER FARE UN PERCORSO PIÙ PRECISO
+//  Se clicchi dentro il musicogramma mentre suona, vedi in console
+//  il punto da copiare dentro pathDanza o pathSarabanda.
 // ---------------------------------------------------------------------
 function mousePressed() {
   if (!currentTrack || !currentImg) return;
@@ -292,7 +294,6 @@ function mousePressed() {
   );
 }
 
-}
 
 
 
