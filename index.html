@@ -114,6 +114,9 @@
       // per quanti secondi resta fermo sulla prima figura all'inizio
       let startHold = 0.6;
 
+      // ultimo indice usato, per evitare salti (max +1 per volta)
+      let lastIdx = 0;
+
       // -------------------------------------------------------------
       //  PUNTI DANZA DELLE ORE
       // -------------------------------------------------------------
@@ -232,13 +235,18 @@
         // musicogramma
         image(currentImg, width / 2, height / 2, imgW, imgH);
 
+        // testo di stato semplice
+        fill(20);
+        textSize(18);
+        text(currentName, width / 2, 30);
+
         if (currentTrack.isPlaying() && currentPath) {
           drawPointer(imgW, imgH);
         }
       }
 
       // -------------------------------------------------------------
-      //  PALLINO – velocità costante, senza salti
+      //  PALLINO – velocità costante + nessun salto di indice
       // -------------------------------------------------------------
       function drawPointer(imgW, imgH) {
         const t = currentTrack.currentTime();
@@ -246,25 +254,41 @@
         if (!d || d <= 0 || !currentPath || currentPath.length === 0) return;
 
         const n = currentPath.length;
-
         let idx;
 
-        // 1) per i primi "startHold" secondi stai sulla prima figura
+        // 1) all’inizio resta sulla prima figura
         if (t < startHold) {
           idx = 0;
+          lastIdx = 0;
         } else {
           // tempo "effettivo" dopo la tenuta iniziale
           const s = t - startHold;
 
           // tempo totale che il pallino usa per attraversare tutte le figure
-          const T = d / speedFactor; // più piccolo = più veloce della musica
+          const T = d / speedFactor; // più piccolo = più veloce
+          let progress = s / T;      // 0..1
 
-          // progress da 0 a 1
-          let progress = s / T;
           if (progress < 0) progress = 0;
           if (progress > 0.999) progress = 0.999;
 
-          idx = Math.floor(progress * n);
+          let rawIdx = Math.floor(progress * n);
+
+          // se per qualsiasi motivo l'indice "torna indietro" (restart/seek), resettalo
+          if (rawIdx < lastIdx) {
+            lastIdx = rawIdx;
+          }
+
+          // ✨ qui il trucco anti-salto:
+          // l'indice può aumentare al massimo di 1 per volta
+          if (rawIdx > lastIdx + 1) {
+            rawIdx = lastIdx + 1;
+          }
+
+          idx = rawIdx;
+          lastIdx = idx;
+
+          if (idx < 0) idx = 0;
+          if (idx > n - 1) idx = n - 1;
         }
 
         const pos = currentPath[idx];
@@ -298,6 +322,7 @@
       // -------------------------------------------------------------
       function selectTrack(name) {
         stopTrack();
+        lastIdx = 0; // reset per evitare salti residui
 
         if (name === "danza") {
           currentTrack = danzaAudio;
@@ -305,9 +330,9 @@
           currentName = "Danza delle ore";
           currentPath = pathDanza;
 
-          // qui regoli solo questi due se proprio serve
-          speedFactor = 3.0;  // ≈ velocità "perfetta" che ti piaceva
-          startHold = 0.6;    // quanto resta sulla prima figura
+          // stessa velocità "perfetta" che ti piaceva (≈3x)
+          speedFactor = 3.0;
+          startHold = 0.6;
         } else if (name === "sarabanda") {
           currentTrack = sarabandaAudio;
           currentImg = sarabandaImg;
@@ -344,6 +369,7 @@
         if (danzaAudio && danzaAudio.isPlaying()) danzaAudio.stop();
         if (sarabandaAudio && sarabandaAudio.isPlaying()) sarabandaAudio.stop();
         setStatus("Riproduzione interrotta.");
+        lastIdx = 0;
       }
 
       function setStatus(msg) {
@@ -364,6 +390,8 @@
     </script>
   </body>
 </html>
+
+
 
 
 
