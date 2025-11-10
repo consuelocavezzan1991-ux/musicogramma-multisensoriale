@@ -104,68 +104,65 @@
       let danzaAudio, sarabandaAudio;
       let danzaImg, sarabandaImg;
 
-      let currentTrack = null;
-      let currentImg = null;
-      let currentName = "";
-      let currentPath = null;
+      let currentTrack = null;   // brano selezionato
+      let currentImg = null;     // immagine del musicogramma
+      let currentName = "";      // nome brano
+      let currentPath = null;    // percorso attivo per il pallino (Danza/Sarabanda)
 
       // ---------------------------------------------------------------------
-      //  PERCORSO "DANZA DELLE ORE"
-      //  p = progressione 0..1 su TUTTO il brano (ricalcolato dai tuoi punti)
+      //  PERCORSI DEL PALLINO
+      //  p = progressione (0 inizio brano, 1 fine brano)
+      //  u = orizzontale (0 sinistra, 1 destra)
+      //  v = verticale   (0 alto,    1 basso)
       // ---------------------------------------------------------------------
+
+      // Danza delle ore – dai tuoi ultimi clic (progress ≈ ...),
+      // con medie dove avevi 2 clic allo stesso istante
       let pathDanza = [
-        { p: 0.00,  u: 0.08, v: 0.07 },
-        { p: 0.026, u: 0.29, v: 0.07 },
-        { p: 0.079, u: 0.50, v: 0.07 },
-        { p: 0.105, u: 0.72, v: 0.07 },
-
-        { p: 0.132, u: 0.08, v: 0.15 },
-        { p: 0.184, u: 0.29, v: 0.16 },
-        { p: 0.211, u: 0.50, v: 0.14 },
-        { p: 0.237, u: 0.63, v: 0.14 },
-        { p: 0.263, u: 0.76, v: 0.17 },
-
-        { p: 0.289, u: 0.09, v: 0.25 },
-        { p: 0.316, u: 0.29, v: 0.26 },
-        { p: 0.342, u: 0.51, v: 0.26 },
-        { p: 0.368, u: 0.72, v: 0.26 },
-
-        { p: 0.421, u: 0.08, v: 0.36 },
-        { p: 0.447, u: 0.29, v: 0.36 },
-        { p: 0.474, u: 0.49, v: 0.34 },
-        { p: 0.500, u: 0.63, v: 0.33 },
-        { p: 0.526, u: 0.76, v: 0.33 },
-
-        { p: 0.553, u: 0.08, v: 0.49 },
-        { p: 0.632, u: 0.40, v: 0.47 },
-        { p: 0.658, u: 0.70, v: 0.47 },
-        { p: 0.684, u: 0.86, v: 0.47 },
-
-        { p: 0.711, u: 0.08, v: 0.62 },
-        { p: 0.763, u: 0.32, v: 0.59 },
-        { p: 0.789, u: 0.60, v: 0.59 },
-        { p: 0.816, u: 0.88, v: 0.60 },
-
-        { p: 0.842, u: 0.15, v: 0.73 },
-        { p: 0.895, u: 0.18, v: 0.84 },
-        { p: 0.921, u: 0.42, v: 0.85 },
-        { p: 0.947, u: 0.60, v: 0.84 },
-        { p: 0.974, u: 0.20, v: 0.97 },
-        { p: 1.000, u: 0.46, v: 0.96 }
+        { p: 0.00, u: 0.08, v: 0.07 },
+        { p: 0.01, u: 0.29, v: 0.07 },
+        { p: 0.03, u: 0.50, v: 0.07 },
+        { p: 0.04, u: 0.72, v: 0.07 },
+        { p: 0.05, u: 0.08, v: 0.15 },
+        { p: 0.07, u: 0.29, v: 0.16 },
+        { p: 0.08, u: 0.50, v: 0.14 },
+        { p: 0.09, u: 0.63, v: 0.14 },
+        { p: 0.10, u: 0.76, v: 0.17 },
+        { p: 0.11, u: 0.09, v: 0.25 },
+        { p: 0.12, u: 0.29, v: 0.26 },
+        { p: 0.13, u: 0.51, v: 0.26 },
+        { p: 0.14, u: 0.72, v: 0.26 },
+        { p: 0.16, u: 0.08, v: 0.36 },
+        { p: 0.17, u: 0.29, v: 0.36 },
+        { p: 0.18, u: 0.49, v: 0.34 },
+        { p: 0.19, u: 0.63, v: 0.33 },
+        { p: 0.20, u: 0.76, v: 0.33 },
+        { p: 0.21, u: 0.08, v: 0.49 },
+        { p: 0.24, u: 0.40, v: 0.47 },  // media tra (0.32,0.47) e (0.48,0.48)
+        { p: 0.25, u: 0.70, v: 0.47 },
+        { p: 0.26, u: 0.86, v: 0.47 },
+        { p: 0.27, u: 0.08, v: 0.62 },
+        { p: 0.29, u: 0.32, v: 0.59 },
+        { p: 0.30, u: 0.60, v: 0.59 },  // media tra (0.49,0.59) e (0.71,0.60)
+        { p: 0.31, u: 0.88, v: 0.60 },
+        { p: 0.32, u: 0.15, v: 0.73 },  // media tra (0.08,0.72) e (0.22,0.74)
+        { p: 0.34, u: 0.18, v: 0.84 },  // media tra (0.10,0.85) e (0.27,0.83)
+        { p: 0.35, u: 0.42, v: 0.85 },
+        { p: 0.36, u: 0.60, v: 0.84 },
+        { p: 0.37, u: 0.20, v: 0.97 },  // media tra (0.11,0.98) e (0.28,0.96)
+        { p: 0.38, u: 0.46, v: 0.96 }
       ];
 
-      // ---------------------------------------------------------------------
-      //  PERCORSO "SARABANDA" – semplice ma completo 0..1
-      // ---------------------------------------------------------------------
+      // Sarabanda – percorso semplice (potrai rifarlo con lo stesso metodo)
       let pathSarabanda = [
         { p: 0.00, u: 0.10, v: 0.08 },
-        { p: 0.14, u: 0.22, v: 0.20 },
-        { p: 0.28, u: 0.35, v: 0.35 },
-        { p: 0.42, u: 0.50, v: 0.50 },
-        { p: 0.56, u: 0.65, v: 0.60 },
-        { p: 0.70, u: 0.78, v: 0.55 },
-        { p: 0.84, u: 0.88, v: 0.70 },
-        { p: 1.00, u: 0.92, v: 0.85 }
+        { p: 0.15, u: 0.20, v: 0.25 },
+        { p: 0.30, u: 0.30, v: 0.45 },
+        { p: 0.45, u: 0.45, v: 0.60 },
+        { p: 0.60, u: 0.60, v: 0.50 },
+        { p: 0.75, u: 0.75, v: 0.65 },
+        { p: 0.90, u: 0.88, v: 0.80 },
+        { p: 1.00, u: 0.92, v: 0.92 }
       ];
 
       // ---------------------------------------------------------------------
@@ -189,13 +186,20 @@
         textAlign(CENTER, CENTER);
         textSize(18);
 
-        document.getElementById("btn-danza")
+        document
+          .getElementById("btn-danza")
           .addEventListener("click", () => selectTrack("danza"));
-        document.getElementById("btn-sarabanda")
+
+        document
+          .getElementById("btn-sarabanda")
           .addEventListener("click", () => selectTrack("sarabanda"));
-        document.getElementById("btn-play")
+
+        document
+          .getElementById("btn-play")
           .addEventListener("click", togglePlayPause);
-        document.getElementById("btn-stop")
+
+        document
+          .getElementById("btn-stop")
           .addEventListener("click", stopTrack);
 
         setStatus("Pronto. Seleziona un brano e poi premi Play.");
@@ -222,16 +226,16 @@
         const imgW = width * 0.8;
         const imgH = height * 0.8;
 
-        // Bordo bianco
+        // bordo bianco
         fill(255);
         noStroke();
         rectMode(CENTER);
         rect(width / 2, height / 2, imgW + 8, imgH + 8, 18);
 
-        // Musicogramma
+        // musicogramma
         image(currentImg, width / 2, height / 2, imgW, imgH);
 
-        // Testo
+        // titolo
         fill(20);
         noStroke();
         textSize(26);
@@ -252,42 +256,48 @@
       }
 
       // ---------------------------------------------------------------------
-      //  PALLINO – usa progress = t / durata, con speedFactor per Danza
+      //  PALLINO – velocizzato e visibile solo all'inizio di ogni figura
       // ---------------------------------------------------------------------
       function drawPointer(imgW, imgH) {
-        const t = currentTrack.currentTime();
-        const d = currentTrack.duration();
+        const t = currentTrack.currentTime();   // tempo corrente (secondi)
+        const d = currentTrack.duration();      // durata totale
         if (!d || d <= 0 || !currentPath || currentPath.length === 0) return;
 
-        const baseProgress = constrain(t / d, 0, 1); // tempo reale 0..1
-        let pathProgress = baseProgress;
+        // progress reale del brano
+        const baseProgress = constrain(t / d, 0, 1);
 
-        // Per "Danza delle ore" lo facciamo un po' più veloce
+        // per Danza delle ore acceleriamo un po' il percorso
+        let pathProgress;
         if (currentTrack === danzaAudio) {
-          const speedFactor = 1.2;  // se è ancora lento, puoi provare 1.3
+          const speedFactor = 1.8; // >1 = più veloce; puoi provare 1.6–2.0
           pathProgress = constrain(baseProgress * speedFactor, 0, 1);
+        } else {
+          pathProgress = baseProgress;
         }
 
         const pos = getPositionAtProgress(pathProgress, currentPath);
         if (!pos) return;
 
-        const imgW80 = imgW;
-        const imgH80 = imgH;
-        const imgX = width / 2 - imgW80 / 2;
-        const imgY = height / 2 - imgH80 / 2;
-        const x = imgX + pos.u * imgW80;
-        const y = imgY + pos.v * imgH80;
+        // visibile SOLO all'inizio di ogni figura: finestrella di tempo
+        const windowWidth = 0.015; // 1.5% del brano circa
+        if (pathProgress < pos.p || pathProgress > pos.p + windowWidth) {
+          return; // fuori dalla "finestra": non disegno il pallino
+        }
+
+        const imgX = width / 2 - imgW / 2;
+        const imgY = height / 2 - imgH / 2;
+        const x = imgX + pos.u * imgW;
+        const y = imgY + pos.v * imgH;
 
         const baseSize = 22;
         const pulse = 4 * sin(frameCount * 0.25);
         const r = baseSize + pulse;
 
         noStroke();
-        const col =
+        let col =
           currentTrack === danzaAudio
             ? color(0, 140, 255, 220)
             : color(255, 80, 150, 220);
-
         fill(col);
         ellipse(x, y, r * 2);
 
@@ -296,32 +306,27 @@
       }
 
       // ---------------------------------------------------------------------
-      //  POSIZIONE (u,v) AL PROGRESS p – con interpolazione
+      //  POSIZIONE (u,v) – sceglie l'ULTIMO punto con p_i <= progress
+      //  e restituisce anche p_i per la finestra di visibilità
       // ---------------------------------------------------------------------
       function getPositionAtProgress(p, path) {
         if (!path || path.length === 0) return null;
 
-        // Prima del primo punto
+        // prima del primo punto → resta sul primo
         if (p <= path[0].p) {
-          return { u: path[0].u, v: path[0].v };
+          return { u: path[0].u, v: path[0].v, p: path[0].p };
         }
 
-        // Trovo il segmento [i, i+1] che contiene p
-        for (let i = 0; i < path.length - 1; i++) {
-          const p1 = path[i].p;
-          const p2 = path[i + 1].p;
-
-          if (p >= p1 && p <= p2) {
-            const t = (p - p1) / (p2 - p1); // 0..1
-            const u = lerp(path[i].u, path[i + 1].u, t);
-            const v = lerp(path[i].v, path[i + 1].v, t);
-            return { u, v };
+        let idx = 0;
+        for (let i = 1; i < path.length; i++) {
+          if (p >= path[i].p) {
+            idx = i;
+          } else {
+            break;
           }
         }
 
-        // Dopo l'ultimo punto
-        const last = path[path.length - 1];
-        return { u: last.u, v: last.v };
+        return { u: path[idx].u, v: path[idx].v, p: path[idx].p };
       }
 
       // ---------------------------------------------------------------------
@@ -370,13 +375,52 @@
         setStatus("Riproduzione interrotta.");
       }
 
+      // ---------------------------------------------------------------------
+      //  STATUS
+      // ---------------------------------------------------------------------
       function setStatus(msg) {
         const el = document.getElementById("status");
         if (el) el.textContent = msg;
       }
 
       // ---------------------------------------------------------------------
-      //  TASTIERA: SPAZIO = Play/Pausa, S = Stop
+      //  REGISTRAZIONE PERCORSO (clic → console, se vorrai altri punti)
+      // ---------------------------------------------------------------------
+      function mousePressed() {
+        if (!currentTrack || !currentImg) return;
+
+        const imgW = width * 0.8;
+        const imgH = height * 0.8;
+        const imgX = width / 2 - imgW / 2;
+        const imgY = height / 2 - imgH / 2;
+
+        if (
+          mouseX < imgX ||
+          mouseX > imgX + imgW ||
+          mouseY < imgY ||
+          mouseY > imgY + imgH
+        ) {
+          return;
+        }
+
+        const t = currentTrack.currentTime();
+        const d = currentTrack.duration();
+        if (!d || d <= 0) return;
+
+        const p = t / d;
+        const u = (mouseX - imgX) / imgW;
+        const v = (mouseY - imgY) / imgH;
+
+        console.log(
+          "Aggiungi punto:",
+          `{ u: ${u.toFixed(2)}, v: ${v.toFixed(2)} }, progress ≈ ${p.toFixed(
+            2
+          )}`
+        );
+      }
+
+      // ---------------------------------------------------------------------
+      //  TASTIERA: spazio = Play/Pausa, S = Stop
       // ---------------------------------------------------------------------
       function keyPressed() {
         if (key === " ") {
@@ -391,7 +435,6 @@
     </script>
   </body>
 </html>
-
 
 
 
