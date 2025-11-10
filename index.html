@@ -2,7 +2,7 @@
 <html lang="it">
   <head>
     <meta charset="UTF-8" />
-    <title>Registrazione punti - Danza delle ore</title>
+    <title>Musicogramma multisensoriale</title>
     <style>
       body {
         margin: 0;
@@ -29,62 +29,190 @@
         font-size: 0.95rem;
       }
 
-      #canvas-container {
-        margin: 20px 0 30px;
-        border-radius: 16px;
-        overflow: hidden;
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: center;
+        margin: 10px 0 5px;
+      }
+
+      button {
+        border: none;
+        padding: 8px 16px;
+        border-radius: 999px;
+        cursor: pointer;
+        font-size: 0.95rem;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        background: white;
+        transition: transform 0.08s ease, box-shadow 0.08s ease,
+          background 0.15s ease;
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+        background: #f0f7ff;
+      }
+
+      button:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
       }
 
       #status {
+        margin-bottom: 10px;
         font-size: 0.9rem;
         color: #333;
         text-align: center;
-        padding: 0 10px 15px;
+        padding: 0 10px;
+      }
+
+      #canvas-container {
+        background: transparent;
+        border-radius: 16px;
+        margin-bottom: 30px;
       }
     </style>
   </head>
 
   <body>
     <header>
-      <h1>Registrazione punti – Danza delle ore</h1>
+      <h1>Musicogramma multisensoriale</h1>
       <p class="subtitle">
-        Clicca in ordine al centro di ogni figura (anche senza musica).
+        Scegli un brano, guarda il musicogramma e segui il pallino con il dito.
       </p>
     </header>
 
-    <div id="status">
-      1. Aspetta che si carichi l'immagine. <br />
-      2. Poi apri la console (F12 → Console) e clicca in ordine tutte le figure.
+    <div class="controls">
+      <button id="btn-danza">Danza delle ore</button>
+      <button id="btn-sarabanda">Sarabanda</button>
+      <button id="btn-play">Play / Pausa</button>
+      <button id="btn-stop">Stop</button>
     </div>
+
+    <div id="status">Pronto. Seleziona un brano e poi premi Play.</div>
 
     <div id="canvas-container"></div>
 
-    <!-- p5.js (solo grafica, niente audio per ora) -->
+    <!-- p5.js + p5.sound -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.sound.min.js"></script>
 
     <script>
-      let danzaImg;
-      let punti = [];
+      let danzaAudio, sarabandaAudio;
+      let danzaImg, sarabandaImg;
 
+      let currentTrack = null;
+      let currentImg = null;
+      let currentName = "";
+      let currentPath = null;
+
+      // fattore che regola il tempo (lo teniamo separato per brano)
+      let syncFactor = 1.0;
+
+      // -------------------------------------------------------------
+      //  PUNTI DANZA DELLE ORE (quelli che hai registrato tu)
+      // -------------------------------------------------------------
+      const pathDanza = [
+        { u: 0.08, v: 0.07 },
+        { u: 0.30, v: 0.07 },
+        { u: 0.50, v: 0.07 },
+        { u: 0.72, v: 0.07 },
+        { u: 0.08, v: 0.16 },
+        { u: 0.29, v: 0.16 },
+        { u: 0.50, v: 0.13 },
+        { u: 0.63, v: 0.14 },
+        { u: 0.75, v: 0.16 },
+        { u: 0.08, v: 0.26 },
+        { u: 0.29, v: 0.26 },
+        { u: 0.50, v: 0.26 },
+        { u: 0.72, v: 0.27 },
+        { u: 0.08, v: 0.36 },
+        { u: 0.29, v: 0.35 },
+        { u: 0.50, v: 0.33 },
+        { u: 0.63, v: 0.34 },
+        { u: 0.76, v: 0.33 },
+        { u: 0.08, v: 0.49 },
+        { u: 0.32, v: 0.48 },
+        { u: 0.08, v: 0.61 },
+        { u: 0.32, v: 0.60 },
+        { u: 0.08, v: 0.72 },
+        { u: 0.23, v: 0.74 },
+        { u: 0.09, v: 0.86 },
+        { u: 0.28, v: 0.84 },
+        { u: 0.42, v: 0.85 },
+        { u: 0.60, v: 0.84 },
+        { u: 0.10, v: 0.96 },
+        { u: 0.28, v: 0.96 },
+        { u: 0.45, v: 0.96 }
+      ];
+
+      // -------------------------------------------------------------
+      //  PUNTI SEMPLICI PER SARABANDA (puoi cambiarli più tardi)
+      // -------------------------------------------------------------
+      const pathSarabanda = [
+        { u: 0.10, v: 0.10 },
+        { u: 0.25, v: 0.20 },
+        { u: 0.40, v: 0.30 },
+        { u: 0.55, v: 0.40 },
+        { u: 0.70, v: 0.50 },
+        { u: 0.80, v: 0.60 },
+        { u: 0.70, v: 0.70 },
+        { u: 0.55, v: 0.80 },
+        { u: 0.40, v: 0.88 },
+        { u: 0.25, v: 0.92 }
+      ];
+
+      // -------------------------------------------------------------
+      //  PRELOAD
+      // -------------------------------------------------------------
       function preload() {
-        // carichiamo SOLO l'immagine del musicogramma di Danza
+        danzaAudio = loadSound("danza.mp3");
+        sarabandaAudio = loadSound("sarabanda.mp3");
         danzaImg = loadImage("danza_musicogramma.png");
+        sarabandaImg = loadImage("sarabanda_musicogramma.png");
       }
 
+      // -------------------------------------------------------------
+      //  SETUP
+      // -------------------------------------------------------------
       function setup() {
         const canvas = createCanvas(900, 600);
         canvas.parent("canvas-container");
 
         textAlign(CENTER, CENTER);
         textSize(18);
+
+        document
+          .getElementById("btn-danza")
+          .addEventListener("click", () => selectTrack("danza"));
+
+        document
+          .getElementById("btn-sarabanda")
+          .addEventListener("click", () => selectTrack("sarabanda"));
+
+        document
+          .getElementById("btn-play")
+          .addEventListener("click", togglePlayPause);
+
+        document.getElementById("btn-stop").addEventListener("click", stopTrack);
       }
 
+      // -------------------------------------------------------------
+      //  DRAW
+      // -------------------------------------------------------------
       function draw() {
         background(244);
 
-        if (!danzaImg) {
+        if (!currentTrack || !currentImg) {
           fill(80);
-          text("Caricamento immagine...", width / 2, height / 2);
+          textSize(22);
+          text(
+            "Seleziona un brano per vedere il musicogramma",
+            width / 2,
+            height / 2
+          );
           return;
         }
 
@@ -92,73 +220,146 @@
         const imgW = width * 0.8;
         const imgH = height * 0.8;
 
-        // bordino bianco
+        // Bordo bianco
         fill(255);
         noStroke();
         rectMode(CENTER);
         rect(width / 2, height / 2, imgW + 8, imgH + 8, 18);
 
-        // disegno il musicogramma
-        image(danzaImg, width / 2, height / 2, imgW, imgH);
+        // Musicogramma
+        image(currentImg, width / 2, height / 2, imgW, imgH);
 
-        // disegno anche i punti già registrati
-        if (punti.length > 0) {
-          fill(0, 140, 255);
-          noStroke();
-          const imgX = width / 2 - imgW / 2;
-          const imgY = height / 2 - imgH / 2;
-          for (let p of punti) {
-            const x = imgX + p.u * imgW;
-            const y = imgY + p.v * imgH;
-            ellipse(x, y, 10);
-          }
+        // Testi
+        fill(20);
+        noStroke();
+        textSize(26);
+        text(currentName, width / 2, 30);
+
+        textSize(14);
+        if (currentTrack.isPlaying()) {
+          fill(40, 160, 90);
+          text("In riproduzione – segui il pallino con il dito", width / 2, 60);
+        } else {
+          fill(120);
+          text("Brano in pausa – premi Play per ascoltare", width / 2, 60);
+        }
+
+        if (currentTrack.isPlaying() && currentPath) {
+          drawPointer(imgW, imgH);
         }
       }
 
-      // QUI REGISTRIAMO I PUNTI QUANDO CLICCHI
-      function mousePressed() {
-        if (!danzaImg) return;
+      // -------------------------------------------------------------
+      //  PALLINO: UNA FIGURA ALLA VOLTA, SENZA SALTI
+      // -------------------------------------------------------------
+      function drawPointer(imgW, imgH) {
+        const t = currentTrack.currentTime();
+        const d = currentTrack.duration();
+        if (!d || d <= 0 || !currentPath || currentPath.length === 0) return;
 
-        const imgW = width * 0.8;
-        const imgH = height * 0.8;
+        const n = currentPath.length;
+
+        // durata "virtuale" del brano vista dal pallino
+        const virtualDuration = d / syncFactor;
+
+        // durata assegnata a ogni figura
+        const step = virtualDuration / n;
+
+        // indice della figura corrente
+        let idx = Math.floor(t / step);
+        if (idx >= n) idx = n - 1;
+
+        const pos = currentPath[idx];
+
+        // converto (u, v) in coordinate sull'immagine
         const imgX = width / 2 - imgW / 2;
         const imgY = height / 2 - imgH / 2;
+        const x = imgX + pos.u * imgW;
+        const y = imgY + pos.v * imgH;
 
-        // se clicchi fuori dal musicogramma, ignoro
-        if (
-          mouseX < imgX ||
-          mouseX > imgX + imgW ||
-          mouseY < imgY ||
-          mouseY > imgY + imgH
-        ) {
+        const baseSize = 22;
+        const pulse = 4 * sin(frameCount * 0.25);
+        const r = baseSize + pulse;
+
+        noStroke();
+        const col =
+          currentTrack === danzaAudio
+            ? color(0, 140, 255, 220)
+            : color(255, 80, 150, 220);
+
+        fill(col);
+        ellipse(x, y, r * 2);
+        fill(red(col), green(col), blue(col), 70);
+        ellipse(x, y, r * 3.2);
+      }
+
+      // -------------------------------------------------------------
+      //  GESTIONE BRANI
+      // -------------------------------------------------------------
+      function selectTrack(name) {
+        stopTrack();
+
+        if (name === "danza") {
+          currentTrack = danzaAudio;
+          currentImg = danzaImg;
+          currentName = "Danza delle ore";
+          currentPath = pathDanza;
+          syncFactor = 1.5; // questo ti era comodo come tempo
+        } else if (name === "sarabanda") {
+          currentTrack = sarabandaAudio;
+          currentImg = sarabandaImg;
+          currentName = "Sarabanda";
+          currentPath = pathSarabanda;
+          syncFactor = 1.0;
+        }
+
+        setStatus(
+          `Brano selezionato: ${currentName}. Premi "Play" per avviare.`
+        );
+      }
+
+      function togglePlayPause() {
+        if (!currentTrack) {
+          setStatus("Seleziona prima un brano.");
           return;
         }
 
-        // coordinate normalizzate (0..1)
-        const u = (mouseX - imgX) / imgW;
-        const v = (mouseY - imgY) / imgH;
+        userStartAudio().then(() => {
+          if (!currentTrack.isPlaying()) {
+            currentTrack.play();
+            setStatus(`Riproduzione di: ${currentName}`);
+          } else {
+            currentTrack.pause();
+            setStatus(`Brano in pausa: ${currentName}`);
+          }
+        });
+      }
 
-        const punto = { u: u, v: v };
-        punti.push(punto);
+      function stopTrack() {
+        if (danzaAudio && danzaAudio.isPlaying()) danzaAudio.stop();
+        if (sarabandaAudio && sarabandaAudio.isPlaying()) sarabandaAudio.stop();
+        setStatus("Riproduzione interrotta.");
+      }
 
-        // stampiamo in console in formato pronto per pathDanza
-        console.log(
-          punti.length + ":",
-          `{ u: ${u.toFixed(2)}, v: ${v.toFixed(2)} },`
-        );
+      function setStatus(msg) {
+        const el = document.getElementById("status");
+        if (el) el.textContent = msg;
+      }
 
-        // aggiorno status a schermo
-        const status = document.getElementById("status");
-        status.textContent =
-          "Punti registrati: " +
-          punti.length +
-          ". Guarda la console (F12 → Console) e alla fine copia tutti i punti.";
+      // TASTIERA: spazio = play/pausa, S = stop
+      function keyPressed() {
+        if (key === " ") {
+          togglePlayPause();
+          return false;
+        }
+        if (key === "s" || key === "S") {
+          stopTrack();
+          return false;
+        }
       }
     </script>
   </body>
 </html>
-
-
 
 
 
