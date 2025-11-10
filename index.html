@@ -108,59 +108,59 @@
       let currentName = "";
       let currentPath = null;
 
-      // fattore che regola il tempo del pallino (per ogni brano lo settiamo in selectTrack)
-      let syncFactor = 1.0;
+      // offset percentuale sulla timeline: negativo = pallino in anticipo
+      let leadPercent = 0.0;
 
       // -------------------------------------------------------------
-      //  PUNTI DANZA DELLE ORE (registrati da te)
+      //  PUNTI DANZA DELLE ORE
       // -------------------------------------------------------------
       const pathDanza = [
         { u: 0.08, v: 0.07 },
-        { u: 0.30, v: 0.07 },
-        { u: 0.50, v: 0.07 },
+        { u: 0.3, v: 0.07 },
+        { u: 0.5, v: 0.07 },
         { u: 0.72, v: 0.07 },
         { u: 0.08, v: 0.16 },
         { u: 0.29, v: 0.16 },
-        { u: 0.50, v: 0.13 },
+        { u: 0.5, v: 0.13 },
         { u: 0.63, v: 0.14 },
         { u: 0.75, v: 0.16 },
         { u: 0.08, v: 0.26 },
         { u: 0.29, v: 0.26 },
-        { u: 0.50, v: 0.26 },
+        { u: 0.5, v: 0.26 },
         { u: 0.72, v: 0.27 },
         { u: 0.08, v: 0.36 },
         { u: 0.29, v: 0.35 },
-        { u: 0.50, v: 0.33 },
+        { u: 0.5, v: 0.33 },
         { u: 0.63, v: 0.34 },
         { u: 0.76, v: 0.33 },
         { u: 0.08, v: 0.49 },
         { u: 0.32, v: 0.48 },
         { u: 0.08, v: 0.61 },
-        { u: 0.32, v: 0.60 },
+        { u: 0.32, v: 0.6 },
         { u: 0.08, v: 0.72 },
         { u: 0.23, v: 0.74 },
         { u: 0.09, v: 0.86 },
         { u: 0.28, v: 0.84 },
         { u: 0.42, v: 0.85 },
-        { u: 0.60, v: 0.84 },
-        { u: 0.10, v: 0.96 },
+        { u: 0.6, v: 0.84 },
+        { u: 0.1, v: 0.96 },
         { u: 0.28, v: 0.96 },
         { u: 0.45, v: 0.96 }
       ];
 
       // -------------------------------------------------------------
-      //  PUNTI SEMPLICI PER SARABANDA (puoi perfezionarli dopo)
+      //  PUNTI SEMPLICI PER SARABANDA
       // -------------------------------------------------------------
       const pathSarabanda = [
-        { u: 0.10, v: 0.10 },
-        { u: 0.25, v: 0.20 },
-        { u: 0.40, v: 0.30 },
-        { u: 0.55, v: 0.40 },
-        { u: 0.70, v: 0.50 },
-        { u: 0.80, v: 0.60 },
-        { u: 0.70, v: 0.70 },
-        { u: 0.55, v: 0.80 },
-        { u: 0.40, v: 0.88 },
+        { u: 0.1, v: 0.1 },
+        { u: 0.25, v: 0.2 },
+        { u: 0.4, v: 0.3 },
+        { u: 0.55, v: 0.4 },
+        { u: 0.7, v: 0.5 },
+        { u: 0.8, v: 0.6 },
+        { u: 0.7, v: 0.7 },
+        { u: 0.55, v: 0.8 },
+        { u: 0.4, v: 0.88 },
         { u: 0.25, v: 0.92 }
       ];
 
@@ -250,7 +250,7 @@
       }
 
       // -------------------------------------------------------------
-      //  PALLINO – con anticipo fisso rispetto alla musica
+      //  PALLINO – sincronizzato con percentuale + anticipo
       // -------------------------------------------------------------
       function drawPointer(imgW, imgH) {
         const t = currentTrack.currentTime();
@@ -259,28 +259,26 @@
 
         const n = currentPath.length;
 
-        // anticipo fisso del pallino rispetto all'audio (in secondi)
-        const leadSeconds = 4.0; // puoi provare 0.6 / 1.0 se serve
-        let tAdjusted = t + leadSeconds;
-        if (tAdjusted > d) tAdjusted = d;
+        // percentuale di avanzamento del brano (0–1)
+        let progress = t / d;
 
-        // durata "virtuale" che il pallino usa (regolata dal syncFactor)
-        const virtualDuration = d / syncFactor;
+        // offset percentuale: negativo = pallino in anticipo
+        progress += leadPercent;
 
-        // durata per ogni figura
-        const step = virtualDuration / n;
+        // limitiamo tra 0 e poco meno di 1 per non oltrepassare l'array
+        progress = constrain(progress, 0, 0.999);
 
-        // indice della figura corrente (con tempo anticipato)
-        let idx = Math.floor(tAdjusted / step);
-        if (idx >= n) idx = n - 1;
-
+        // indice nel path
+        const idx = Math.floor(progress * n);
         const pos = currentPath[idx];
 
+        // coordinate dell'immagine
         const imgX = width / 2 - imgW / 2;
         const imgY = height / 2 - imgH / 2;
         const x = imgX + pos.u * imgW;
         const y = imgY + pos.v * imgH;
 
+        // effetto pallino pulsante
         const baseSize = 22;
         const pulse = 4 * sin(frameCount * 0.25);
         const r = baseSize + pulse;
@@ -309,13 +307,17 @@
           currentImg = danzaImg;
           currentName = "Danza delle ore";
           currentPath = pathDanza;
-          syncFactor = 3.0; // base: se serve, prova 1.6 o 1.4
+
+          // prova questo anticipo; aggiusta a orecchio (es. -0.03, -0.05…)
+          leadPercent = -0.04;
         } else if (name === "sarabanda") {
           currentTrack = sarabandaAudio;
           currentImg = sarabandaImg;
           currentName = "Sarabanda";
           currentPath = pathSarabanda;
-          syncFactor = 1.0;
+
+          // qui magari serve meno anticipo
+          leadPercent = -0.02;
         }
 
         setStatus(
@@ -365,29 +367,6 @@
     </script>
   </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
