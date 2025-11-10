@@ -269,7 +269,7 @@
 
         // fattore di velocità per Danza (più alto = più veloce)
         if (currentTrack === danzaAudio) {
-          const speedFactor = 1.6; // prova 1.6; se troppo, scendi a 1.4
+          const speedFactor = 2.5; // aumenta se è ancora lento (es. 3)
           progress = constrain(progress * speedFactor, 0, 1);
         }
 
@@ -368,6 +368,8 @@
     </script>
   </body>
 </html>
+
+
 
 
 
