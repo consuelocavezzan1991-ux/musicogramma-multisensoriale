@@ -48,6 +48,10 @@
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
         background: #f0f7ff;
       }
+      button:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+      }
       #status {
         margin-bottom: 10px;
         font-size: 0.9rem;
@@ -81,6 +85,7 @@
 
     <div id="canvas-container"></div>
 
+    <!-- p5.js + p5.sound -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.sound.min.js"></script>
 
@@ -94,58 +99,61 @@
       let currentPath = null;
       let currentDurations = null;
 
+      // velocità globale del pallino (più grande = più veloce)
       let speedFactor = 1.0;
+
+      // per quanti secondi resta fermo sulla prima figura all'inizio
       let startHold = 0.6;
 
       // -------------------------------------------------------------
       //  PUNTI DANZA DELLE ORE
       // -------------------------------------------------------------
       const pathDanza = [
-        { u: 0.08, v: 0.07 },
-        { u: 0.3, v: 0.07 },
-        { u: 0.5, v: 0.07 },
-        { u: 0.72, v: 0.07 },
-        { u: 0.08, v: 0.16 },
-        { u: 0.29, v: 0.16 },
-        { u: 0.5, v: 0.13 },
-        { u: 0.63, v: 0.14 },
+        { u: 0.08, v: 0.07 }, // 1
+        { u: 0.3, v: 0.07 },  // 2
+        { u: 0.5, v: 0.07 },  // 3
+        { u: 0.72, v: 0.07 }, // 4
+        { u: 0.08, v: 0.16 }, // 5
+        { u: 0.29, v: 0.16 }, // 6
+        { u: 0.5, v: 0.13 },  // 7
+        { u: 0.63, v: 0.14 }, // 8
         { u: 0.75, v: 0.16 }, // 9
-        { u: 0.08, v: 0.26 },
-        { u: 0.29, v: 0.26 },
-        { u: 0.5, v: 0.26 },
-        { u: 0.72, v: 0.27 },
-        { u: 0.08, v: 0.36 },
-        { u: 0.29, v: 0.35 },
-        { u: 0.5, v: 0.33 },
-        { u: 0.63, v: 0.34 },
-        { u: 0.76, v: 0.33 },
+        { u: 0.08, v: 0.26 }, // 10
+        { u: 0.29, v: 0.26 }, // 11
+        { u: 0.5, v: 0.26 },  // 12
+        { u: 0.72, v: 0.27 }, // 13
+        { u: 0.08, v: 0.36 }, // 14
+        { u: 0.29, v: 0.35 }, // 15
+        { u: 0.5, v: 0.33 },  // 16
+        { u: 0.63, v: 0.34 }, // 17
+        { u: 0.76, v: 0.33 }, // 18
         { u: 0.08, v: 0.49 }, // 19
         { u: 0.32, v: 0.48 }, // 20
         { u: 0.08, v: 0.61 }, // 21
         { u: 0.32, v: 0.6 },  // 22
-        { u: 0.08, v: 0.72 },
-        { u: 0.23, v: 0.74 },
-        { u: 0.09, v: 0.86 },
-        { u: 0.28, v: 0.84 },
-        { u: 0.42, v: 0.85 },
-        { u: 0.6, v: 0.84 },
-        { u: 0.1, v: 0.96 },
-        { u: 0.28, v: 0.96 },
-        { u: 0.45, v: 0.96 }
+        { u: 0.08, v: 0.72 }, // 23
+        { u: 0.23, v: 0.74 }, // 24
+        { u: 0.09, v: 0.86 }, // 25
+        { u: 0.28, v: 0.84 }, // 26
+        { u: 0.42, v: 0.85 }, // 27
+        { u: 0.6, v: 0.84 },  // 28
+        { u: 0.1, v: 0.96 },  // 29
+        { u: 0.28, v: 0.96 }, // 30
+        { u: 0.45, v: 0.96 }  // 31
       ];
 
       // Durate relative (pesi)
       // 9 -> 3, 19 -> 3, 20 -> 4, 21 -> 3, 22 -> 4
       const durationsDanza = [
-        1, 1, 1, 1,  // 1–4
-        1, 1, 1, 1,
-        3,  // 9
-        1, 1, 1, 1, // 10–13
-        1, 1, 1, 1, 1, // 14–18
-        3, // 19
-        4, // 20
-        3, // 21
-        4, // 22
+        1, 1, 1, 1,   // 1–4
+        1, 1, 1, 1,   // 5–8
+        3,            // 9
+        1, 1, 1, 1,   // 10–13
+        1, 1, 1, 1, 1,// 14–18
+        3,            // 19
+        4,            // 20
+        3,            // 21
+        4,            // 22
         1, 1, 1, 1, 1, 1, 1, 1, 1 // 23–31
       ];
 
@@ -166,6 +174,9 @@
       ];
       const durationsSarabanda = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
 
+      // -------------------------------------------------------------
+      //  PRELOAD
+      // -------------------------------------------------------------
       function preload() {
         danzaAudio = loadSound("danza.mp3");
         sarabandaAudio = loadSound("sarabanda.mp3");
@@ -173,6 +184,9 @@
         sarabandaImg = loadImage("sarabanda_musicogramma.png");
       }
 
+      // -------------------------------------------------------------
+      //  SETUP
+      // -------------------------------------------------------------
       function setup() {
         const canvas = createCanvas(900, 600);
         canvas.parent("canvas-container");
@@ -193,8 +207,12 @@
           .addEventListener("click", stopTrack);
       }
 
+      // -------------------------------------------------------------
+      //  DRAW
+      // -------------------------------------------------------------
       function draw() {
         background(244);
+
         if (!currentTrack || !currentImg) {
           fill(80);
           text(
@@ -206,25 +224,43 @@
         }
 
         imageMode(CENTER);
-        const imgW = width * 0.8,
-          imgH = height * 0.8;
+        const imgW = width * 0.8;
+        const imgH = height * 0.8;
+
+        // bordo bianco
         fill(255);
         noStroke();
         rectMode(CENTER);
         rect(width / 2, height / 2, imgW + 8, imgH + 8, 18);
+
+        // musicogramma
         image(currentImg, width / 2, height / 2, imgW, imgH);
 
-        if (currentTrack.isPlaying()) drawPointer(imgW, imgH);
+        // titolo
+        fill(20);
+        textSize(20);
+        text(currentName, width / 2, 30);
+
+        if (currentTrack.isPlaying() && currentPath && currentDurations) {
+          drawPointer(imgW, imgH);
+        }
       }
 
+      // -------------------------------------------------------------
+      //  PALLINO – usa le durate pesate + velocità globale
+      // -------------------------------------------------------------
       function drawPointer(imgW, imgH) {
         const t = currentTrack.currentTime();
         const d = currentTrack.duration();
         if (!d || !currentPath || !currentDurations) return;
 
         const n = currentPath.length;
+
+        // tempo totale "virtuale" che il pallino usa per completare il giro
         const totalWeight = currentDurations.reduce((a, b) => a + b, 0);
-        const totalTime = d / speedFactor;
+        const totalTime = d / speedFactor; // più piccolo = più veloce del brano
+
+        // calcolo tempi cumulativi per ogni figura
         const times = [];
         let sum = 0;
         for (let w of currentDurations) {
@@ -232,12 +268,15 @@
           times.push(sum);
         }
 
+        // nei primissimi istanti resta sulla prima figura
         if (t < startHold) {
           drawDot(currentPath[0], imgW, imgH);
           return;
         }
 
         const tEff = t - startHold;
+
+        // trova l'indice della figura corrispondente a tEff
         let idx = n - 1;
         for (let i = 0; i < times.length; i++) {
           if (tEff <= times[i]) {
@@ -247,6 +286,7 @@
         }
         if (idx < 0) idx = 0;
         if (idx >= n) idx = n - 1;
+
         drawDot(currentPath[idx], imgW, imgH);
       }
 
@@ -255,26 +295,35 @@
         const imgY = height / 2 - imgH / 2;
         const x = imgX + pos.u * imgW;
         const y = imgY + pos.v * imgH;
+
         const baseSize = 22;
         const pulse = 4 * sin(frameCount * 0.25);
         const r = baseSize + pulse;
+
         noStroke();
         const col = color(0, 140, 255, 220);
         fill(col);
         ellipse(x, y, r * 2);
+
         fill(0, 140, 255, 70);
         ellipse(x, y, r * 3.2);
       }
 
+      // -------------------------------------------------------------
+      //  GESTIONE BRANI
+      // -------------------------------------------------------------
       function selectTrack(name) {
         stopTrack();
+
         if (name === "danza") {
           currentTrack = danzaAudio;
           currentImg = danzaImg;
           currentName = "Danza delle ore";
           currentPath = pathDanza;
           currentDurations = durationsDanza;
-          speedFactor = 2.00;
+
+          // 💡 qui controlli la velocità globale del pallino
+          speedFactor = 2.75; // leggermente più lento di 3.0
           startHold = 0.6;
         } else {
           currentTrack = sarabandaAudio;
@@ -282,29 +331,56 @@
           currentName = "Sarabanda";
           currentPath = pathSarabanda;
           currentDurations = durationsSarabanda;
+
           speedFactor = 1.5;
           startHold = 0.5;
         }
+
         document.getElementById("status").textContent =
           `Brano selezionato: ${currentName}. Premi "Play" per avviare.`;
       }
 
       function togglePlayPause() {
-        if (!currentTrack) return;
+        if (!currentTrack) {
+          document.getElementById("status").textContent =
+            "Seleziona prima un brano.";
+          return;
+        }
+
         userStartAudio().then(() => {
-          currentTrack.isPlaying()
-            ? currentTrack.pause()
-            : currentTrack.play();
+          if (currentTrack.isPlaying()) {
+            currentTrack.pause();
+            document.getElementById("status").textContent =
+              `Brano in pausa: ${currentName}`;
+          } else {
+            currentTrack.play();
+            document.getElementById("status").textContent =
+              `Riproduzione di: ${currentName}`;
+          }
         });
       }
 
       function stopTrack() {
         if (danzaAudio && danzaAudio.isPlaying()) danzaAudio.stop();
         if (sarabandaAudio && sarabandaAudio.isPlaying()) sarabandaAudio.stop();
+        document.getElementById("status").textContent =
+          "Riproduzione interrotta.";
+      }
+
+      function keyPressed() {
+        if (key === " ") {
+          togglePlayPause();
+          return false;
+        }
+        if (key === "s" || key === "S") {
+          stopTrack();
+          return false;
+        }
       }
     </script>
   </body>
 </html>
+
 
 
 
