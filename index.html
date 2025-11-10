@@ -111,8 +111,8 @@
       // offset percentuale sulla timeline: negativo = pallino in anticipo
       let leadPercent = 0.0;
 
-      // per quanti secondi il pallino resta FORZATO sulla prima figura
-      let holdFirstSeconds = 0.0;
+      // fattore di velocità: >1 = pallino si muove più veloce della musica
+      let speedFactor = 1.0;
 
       // -------------------------------------------------------------
       //  PUNTI DANZA DELLE ORE
@@ -253,7 +253,7 @@
       }
 
       // -------------------------------------------------------------
-      //  PALLINO – percentuale + anticipo + "tenuta" sulla prima figura
+      //  PALLINO – percentuale * velocità + anticipo
       // -------------------------------------------------------------
       function drawPointer(imgW, imgH) {
         const t = currentTrack.currentTime();
@@ -262,20 +262,11 @@
 
         const n = currentPath.length;
 
-        let progress;
+        // percentuale di avanzamento del brano
+        let progress = (t / d) * speedFactor; // velocità regolabile
 
-        // 1) per i primi X secondi il pallino resta sulla prima figura
-        if (t < holdFirstSeconds) {
-          progress = 0; // sempre indice 0
-        } else {
-          // 2) dopo, usiamo la percentuale sul TEMPO RIMANENTE
-          const effectiveT = t - holdFirstSeconds;
-          let effectiveD = d - holdFirstSeconds;
-          if (effectiveD <= 0) effectiveD = d; // fallback di sicurezza
-
-          progress = effectiveT / effectiveD; // 0..1
-          progress += leadPercent; // anticipo/ritardo fine
-        }
+        // piccolo anticipo/ritardo fine
+        progress += leadPercent;
 
         // limitiamo tra 0 e poco meno di 1
         if (progress < 0) progress = 0;
@@ -320,17 +311,19 @@
           currentName = "Danza delle ore";
           currentPath = pathDanza;
 
-          // QUI regoli anticipo e quanto resta sulla prima figura
-          leadPercent = -0.03;      // piccolo anticipo (era la versione che "come velocità andava bene")
-          holdFirstSeconds = 1.0;   // 1 secondo fisso sulla prima figura
+          // QUI ho messo valori per:
+          // - velocità simile a prima (più veloce della musica)
+          // - anticipo piccolo
+          speedFactor = 3.0;   // se è troppo veloce, prova 2.5
+          leadPercent = -0.02; // se è leggermente in ritardo, fai -0.03
         } else if (name === "sarabanda") {
           currentTrack = sarabandaAudio;
           currentImg = sarabandaImg;
           currentName = "Sarabanda";
           currentPath = pathSarabanda;
 
-          leadPercent = -0.02;
-          holdFirstSeconds = 0.8;
+          speedFactor = 1.5;
+          leadPercent = -0.01;
         }
 
         setStatus(
@@ -380,8 +373,6 @@
     </script>
   </body>
 </html>
-
-
 
 
 
