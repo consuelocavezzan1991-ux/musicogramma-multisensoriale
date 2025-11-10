@@ -91,8 +91,9 @@
         currentImg = null,
         currentPath = null,
         currentName = "";
-      let syncFactor = 0.83; // sincronia: più alto = più veloce
+      let syncFactor = 1.0; // iniziale
 
+      // ------------------ PERCORSO DANZA ------------------
       const pathDanza = [
         { u: 0.08, v: 0.07 },
         { u: 0.29, v: 0.07 },
@@ -128,6 +129,7 @@
         { u: 0.46, v: 0.96 }
       ];
 
+      // ------------------ PERCORSO SARABANDA ------------------
       const pathSarabanda = [
         { u: 0.10, v: 0.10 },
         { u: 0.22, v: 0.20 },
@@ -141,6 +143,7 @@
         { u: 0.25, v: 0.90 }
       ];
 
+      // ------------------ PRELOAD ------------------
       function preload() {
         danzaAudio = loadSound("danza.mp3");
         sarabandaAudio = loadSound("sarabanda.mp3");
@@ -148,6 +151,7 @@
         sarabandaImg = loadImage("sarabanda_musicogramma.png");
       }
 
+      // ------------------ SETUP ------------------
       function setup() {
         const canvas = createCanvas(900, 600);
         canvas.parent("canvas-container");
@@ -160,6 +164,7 @@
         document.getElementById("btn-stop").onclick = () => stopTrack();
       }
 
+      // ------------------ DRAW ------------------
       function draw() {
         background(240);
 
@@ -178,12 +183,13 @@
         if (currentTrack.isPlaying()) drawPointer(imgW, imgH);
       }
 
+      // ------------------ PALLINO ------------------
       function drawPointer(imgW, imgH) {
         const t = currentTrack.currentTime();
         const d = currentTrack.duration();
         if (!d || d <= 0) return;
 
-        const progress = constrain((t / d) * syncFactor, 0, 1);
+        const progress = (t / (d * (1 / syncFactor))) % 1;
         const n = currentPath.length;
         const idx = Math.min(Math.floor(progress * n), n - 1);
         const pos = currentPath[idx];
@@ -194,11 +200,12 @@
         const y = imgY + pos.v * imgH;
 
         noStroke();
-        fill(0, 130, 255, 220);
-        const r = 20 + 5 * sin(frameCount * 0.2);
+        fill(0, 130, 255, 230);
+        const r = 22 + 4 * sin(frameCount * 0.3);
         ellipse(x, y, r);
       }
 
+      // ------------------ GESTIONE BRANI ------------------
       function selectTrack(name) {
         stopTrack();
         if (name === "danza") {
@@ -206,7 +213,7 @@
           currentImg = danzaImg;
           currentPath = pathDanza;
           currentName = "Danza delle ore";
-          syncFactor = 0.74;
+          syncFactor = 1.6; // ✅ velocità calibrata per Danza
         } else {
           currentTrack = sarabandaAudio;
           currentImg = sarabandaImg;
@@ -214,9 +221,8 @@
           currentName = "Sarabanda";
           syncFactor = 1.0;
         }
-        document.getElementById(
-          "status"
-        ).textContent = `Brano selezionato: ${currentName}`;
+        document.getElementById("status").textContent =
+          "Brano selezionato: " + currentName;
       }
 
       function togglePlayPause() {
@@ -244,6 +250,7 @@
           "⏹ Riproduzione interrotta.";
       }
 
+      // ------------------ TASTIERA ------------------
       function keyPressed() {
         if (key === " ") togglePlayPause();
         if (key === "s" || key === "S") stopTrack();
@@ -251,6 +258,7 @@
     </script>
   </body>
 </html>
+
 
 
 
