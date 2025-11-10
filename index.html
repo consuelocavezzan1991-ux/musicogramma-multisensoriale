@@ -111,8 +111,8 @@
       // offset percentuale sulla timeline: negativo = pallino in anticipo
       let leadPercent = 0.0;
 
-      // offset sull'indice delle figure: negativo = verso le prime figure
-      let indexOffset = 0;
+      // per quanti secondi il pallino resta FORZATO sulla prima figura
+      let holdFirstSeconds = 0.0;
 
       // -------------------------------------------------------------
       //  PUNTI DANZA DELLE ORE
@@ -253,33 +253,35 @@
       }
 
       // -------------------------------------------------------------
-      //  PALLINO – percentuale + anticipo + offset figura
+      //  PALLINO – percentuale + anticipo + "tenuta" sulla prima figura
       // -------------------------------------------------------------
       function drawPointer(imgW, imgH) {
         const t = currentTrack.currentTime();
         const d = currentTrack.duration();
-
         if (!d || d <= 0 || !currentPath || currentPath.length === 0) return;
 
         const n = currentPath.length;
 
-        // percentuale di avanzamento del brano (0–1)
-        let progress = t / d;
+        let progress;
 
-        // offset percentuale: negativo = pallino in anticipo
-        progress += leadPercent;
+        // 1) per i primi X secondi il pallino resta sulla prima figura
+        if (t < holdFirstSeconds) {
+          progress = 0; // sempre indice 0
+        } else {
+          // 2) dopo, usiamo la percentuale sul TEMPO RIMANENTE
+          const effectiveT = t - holdFirstSeconds;
+          let effectiveD = d - holdFirstSeconds;
+          if (effectiveD <= 0) effectiveD = d; // fallback di sicurezza
 
-        // clamp tra 0 e 0.999
+          progress = effectiveT / effectiveD; // 0..1
+          progress += leadPercent; // anticipo/ritardo fine
+        }
+
+        // limitiamo tra 0 e poco meno di 1
         if (progress < 0) progress = 0;
         if (progress > 0.999) progress = 0.999;
 
-        // indice nel path + offset di figura
-        let idx = Math.floor(progress * n) + indexOffset;
-
-        // clamp indice tra 0 e n-1
-        if (idx < 0) idx = 0;
-        if (idx > n - 1) idx = n - 1;
-
+        const idx = Math.floor(progress * n);
         const pos = currentPath[idx];
 
         // coordinate dell'immagine
@@ -318,12 +320,9 @@
           currentName = "Danza delle ore";
           currentPath = pathDanza;
 
-          // anticipo temporale (percentuale del brano)
-          leadPercent = -0.04;
-
-          // se ti sembra parta dalla terza figura,
-          // puoi giocare con questo (-1, -2, -3...)
-          indexOffset = -2;
+          // QUI regoli anticipo e quanto resta sulla prima figura
+          leadPercent = -0.03;      // piccolo anticipo (era la versione che "come velocità andava bene")
+          holdFirstSeconds = 1.0;   // 1 secondo fisso sulla prima figura
         } else if (name === "sarabanda") {
           currentTrack = sarabandaAudio;
           currentImg = sarabandaImg;
@@ -331,7 +330,7 @@
           currentPath = pathSarabanda;
 
           leadPercent = -0.02;
-          indexOffset = 0;
+          holdFirstSeconds = 0.8;
         }
 
         setStatus(
@@ -381,6 +380,7 @@
     </script>
   </body>
 </html>
+
 
 
 
