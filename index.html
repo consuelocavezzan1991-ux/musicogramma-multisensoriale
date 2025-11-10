@@ -252,22 +252,31 @@
       }
 
       // ---------------------------------------------------------------------
-      //  PALLINO – usa progress = t / durata, e i p 0..1 del percorso
+      //  PALLINO – usa progress = t / durata, con speedFactor per Danza
       // ---------------------------------------------------------------------
       function drawPointer(imgW, imgH) {
         const t = currentTrack.currentTime();
         const d = currentTrack.duration();
         if (!d || d <= 0 || !currentPath || currentPath.length === 0) return;
 
-        const progress = constrain(t / d, 0, 1); // 0..1 sul brano
+        const baseProgress = constrain(t / d, 0, 1); // tempo reale 0..1
+        let pathProgress = baseProgress;
 
-        const pos = getPositionAtProgress(progress, currentPath);
+        // Per "Danza delle ore" lo facciamo un po' più veloce
+        if (currentTrack === danzaAudio) {
+          const speedFactor = 1.2;  // se è ancora lento, puoi provare 1.3
+          pathProgress = constrain(baseProgress * speedFactor, 0, 1);
+        }
+
+        const pos = getPositionAtProgress(pathProgress, currentPath);
         if (!pos) return;
 
-        const imgX = width / 2 - imgW / 2;
-        const imgY = height / 2 - imgH / 2;
-        const x = imgX + pos.u * imgW;
-        const y = imgY + pos.v * imgH;
+        const imgW80 = imgW;
+        const imgH80 = imgH;
+        const imgX = width / 2 - imgW80 / 2;
+        const imgY = height / 2 - imgH80 / 2;
+        const x = imgX + pos.u * imgW80;
+        const y = imgY + pos.v * imgH80;
 
         const baseSize = 22;
         const pulse = 4 * sin(frameCount * 0.25);
