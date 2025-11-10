@@ -108,11 +108,11 @@
       let currentName = "";
       let currentPath = null;
 
-      // fattore che regola il tempo (lo teniamo separato per brano)
-      let syncFactor = 60.5;
+      // fattore che regola il tempo del pallino (per ogni brano lo settiamo in selectTrack)
+      let syncFactor = 1.0;
 
       // -------------------------------------------------------------
-      //  PUNTI DANZA DELLE ORE (quelli che hai registrato tu)
+      //  PUNTI DANZA DELLE ORE (registrati da te)
       // -------------------------------------------------------------
       const pathDanza = [
         { u: 0.08, v: 0.07 },
@@ -149,7 +149,7 @@
       ];
 
       // -------------------------------------------------------------
-      //  PUNTI SEMPLICI PER SARABANDA (puoi cambiarli più tardi)
+      //  PUNTI SEMPLICI PER SARABANDA (puoi perfezionarli dopo)
       // -------------------------------------------------------------
       const pathSarabanda = [
         { u: 0.10, v: 0.10 },
@@ -220,16 +220,16 @@
         const imgW = width * 0.8;
         const imgH = height * 0.8;
 
-        // Bordo bianco
+        // bordo bianco
         fill(255);
         noStroke();
         rectMode(CENTER);
         rect(width / 2, height / 2, imgW + 8, imgH + 8, 18);
 
-        // Musicogramma
+        // musicogramma
         image(currentImg, width / 2, height / 2, imgW, imgH);
 
-        // Testi
+        // testi
         fill(20);
         noStroke();
         textSize(26);
@@ -250,7 +250,7 @@
       }
 
       // -------------------------------------------------------------
-      //  PALLINO: UNA FIGURA ALLA VOLTA, SENZA SALTI
+      //  PALLINO – con anticipo fisso rispetto alla musica
       // -------------------------------------------------------------
       function drawPointer(imgW, imgH) {
         const t = currentTrack.currentTime();
@@ -259,19 +259,23 @@
 
         const n = currentPath.length;
 
-        // durata "virtuale" del brano vista dal pallino
+        // anticipo fisso del pallino rispetto all'audio (in secondi)
+        const leadSeconds = 0.8; // puoi provare 0.6 / 1.0 se serve
+        let tAdjusted = t + leadSeconds;
+        if (tAdjusted > d) tAdjusted = d;
+
+        // durata "virtuale" che il pallino usa (regolata dal syncFactor)
         const virtualDuration = d / syncFactor;
 
-        // durata assegnata a ogni figura
+        // durata per ogni figura
         const step = virtualDuration / n;
 
-        // indice della figura corrente
-        let idx = Math.floor(t / step);
+        // indice della figura corrente (con tempo anticipato)
+        let idx = Math.floor(tAdjusted / step);
         if (idx >= n) idx = n - 1;
 
         const pos = currentPath[idx];
 
-        // converto (u, v) in coordinate sull'immagine
         const imgX = width / 2 - imgW / 2;
         const imgY = height / 2 - imgH / 2;
         const x = imgX + pos.u * imgW;
@@ -289,6 +293,7 @@
 
         fill(col);
         ellipse(x, y, r * 2);
+
         fill(red(col), green(col), blue(col), 70);
         ellipse(x, y, r * 3.2);
       }
@@ -304,7 +309,7 @@
           currentImg = danzaImg;
           currentName = "Danza delle ore";
           currentPath = pathDanza;
-          syncFactor = 1.5; // questo ti era comodo come tempo
+          syncFactor = 1.5; // base: se serve, prova 1.6 o 1.4
         } else if (name === "sarabanda") {
           currentTrack = sarabandaAudio;
           currentImg = sarabandaImg;
@@ -346,7 +351,7 @@
         if (el) el.textContent = msg;
       }
 
-      // TASTIERA: spazio = play/pausa, S = stop
+      // TASTIERA: spazio = Play/Pausa, S = Stop
       function keyPressed() {
         if (key === " ") {
           togglePlayPause();
