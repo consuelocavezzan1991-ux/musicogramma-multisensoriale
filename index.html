@@ -56,17 +56,11 @@
         background: #f0f7ff;
       }
 
-      button:active {
-        transform: translateY(0);
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-      }
-
       #status {
         margin-bottom: 10px;
         font-size: 0.9rem;
         color: #333;
         text-align: center;
-        padding: 0 10px;
       }
 
       #canvas-container {
@@ -103,39 +97,43 @@
       let danzaImg, sarabandaImg;
       let currentTrack = null;
       let currentImg = null;
-      let currentName = "";
       let currentPath = null;
-      let syncFactor = 0.83;
+      let currentName = "";
+      let syncFactor = 0.75; // ⏱️ regola sincronizzazione (più basso = più lento)
 
-      let pathDanza = [
-        { u: 0.08, v: 0.07 }, { u: 0.29, v: 0.07 }, { u: 0.50, v: 0.07 }, { u: 0.72, v: 0.07 },
-        { u: 0.08, v: 0.15 }, { u: 0.29, v: 0.16 }, { u: 0.50, v: 0.14 }, { u: 0.63, v: 0.14 },
-        { u: 0.76, v: 0.17 }, { u: 0.09, v: 0.25 }, { u: 0.29, v: 0.26 }, { u: 0.51, v: 0.26 },
-        { u: 0.72, v: 0.26 }, { u: 0.08, v: 0.36 }, { u: 0.29, v: 0.36 }, { u: 0.49, v: 0.34 },
-        { u: 0.63, v: 0.33 }, { u: 0.76, v: 0.33 }, { u: 0.08, v: 0.49 }, { u: 0.40, v: 0.47 },
-        { u: 0.70, v: 0.47 }, { u: 0.86, v: 0.47 }, { u: 0.08, v: 0.62 }, { u: 0.32, v: 0.59 },
-        { u: 0.60, v: 0.59 }, { u: 0.88, v: 0.60 }, { u: 0.15, v: 0.73 }, { u: 0.18, v: 0.84 },
-        { u: 0.42, v: 0.85 }, { u: 0.60, v: 0.84 }, { u: 0.20, v: 0.97 }, { u: 0.46, v: 0.96 }
+      // --- Percorso pallino (uno per figura) ---
+      const pathDanza = [
+        { u: 0.08, v: 0.07 }, { u: 0.29, v: 0.07 }, { u: 0.50, v: 0.07 },
+        { u: 0.72, v: 0.07 }, { u: 0.08, v: 0.15 }, { u: 0.29, v: 0.16 },
+        { u: 0.50, v: 0.14 }, { u: 0.63, v: 0.14 }, { u: 0.76, v: 0.17 },
+        { u: 0.09, v: 0.25 }, { u: 0.29, v: 0.26 }, { u: 0.51, v: 0.26 },
+        { u: 0.72, v: 0.26 }, { u: 0.08, v: 0.36 }, { u: 0.29, v: 0.36 },
+        { u: 0.49, v: 0.34 }, { u: 0.63, v: 0.33 }, { u: 0.76, v: 0.33 },
+        { u: 0.08, v: 0.49 }, { u: 0.40, v: 0.47 }, { u: 0.70, v: 0.47 },
+        { u: 0.86, v: 0.47 }, { u: 0.08, v: 0.62 }, { u: 0.32, v: 0.59 },
+        { u: 0.60, v: 0.59 }, { u: 0.88, v: 0.60 }, { u: 0.15, v: 0.73 },
+        { u: 0.18, v: 0.84 }, { u: 0.42, v: 0.85 }, { u: 0.60, v: 0.84 },
+        { u: 0.20, v: 0.97 }, { u: 0.46, v: 0.96 }
       ];
 
-      let pathSarabanda = [
-        { u: 0.10, v: 0.10 }, { u: 0.22, v: 0.20 }, { u: 0.35, v: 0.30 }, { u: 0.50, v: 0.40 },
-        { u: 0.65, v: 0.50 }, { u: 0.78, v: 0.60 }, { u: 0.70, v: 0.70 }, { u: 0.55, v: 0.78 },
-        { u: 0.40, v: 0.85 }, { u: 0.25, v: 0.90 }
+      const pathSarabanda = [
+        { u: 0.10, v: 0.10 }, { u: 0.22, v: 0.20 }, { u: 0.35, v: 0.30 },
+        { u: 0.50, v: 0.40 }, { u: 0.65, v: 0.50 }, { u: 0.78, v: 0.60 },
+        { u: 0.70, v: 0.70 }, { u: 0.55, v: 0.78 }, { u: 0.40, v: 0.85 },
+        { u: 0.25, v: 0.90 }
       ];
 
       function preload() {
-        danzaAudio = loadSound("danza.mp3", () => console.log("✅ Danza caricata"), () => alert("❌ Errore: manca danza.mp3"));
-        sarabandaAudio = loadSound("sarabanda.mp3", () => console.log("✅ Sarabanda caricata"), () => alert("❌ Errore: manca sarabanda.mp3"));
-        danzaImg = loadImage("danza_musicogramma.png", () => console.log("✅ Immagine Danza caricata"), () => alert("❌ Errore: manca danza_musicogramma.png"));
-        sarabandaImg = loadImage("sarabanda_musicogramma.png", () => console.log("✅ Immagine Sarabanda caricata"), () => alert("❌ Errore: manca sarabanda_musicogramma.png"));
+        danzaAudio = loadSound("danza.mp3");
+        sarabandaAudio = loadSound("sarabanda.mp3");
+        danzaImg = loadImage("danza_musicogramma.png");
+        sarabandaImg = loadImage("sarabanda_musicogramma.png");
       }
 
       function setup() {
         const canvas = createCanvas(900, 600);
         canvas.parent("canvas-container");
-        textAlign(CENTER, CENTER);
-        textSize(18);
+
         document.getElementById("btn-danza").addEventListener("click", () => selectTrack("danza"));
         document.getElementById("btn-sarabanda").addEventListener("click", () => selectTrack("sarabanda"));
         document.getElementById("btn-play").addEventListener("click", () => togglePlayPause());
@@ -143,17 +141,87 @@
       }
 
       function draw() {
-        background(244);
+        background(240);
         if (!currentTrack || !currentImg) {
-          fill(80);
-          textSize(22);
+          fill(70);
+          textAlign(CENTER, CENTER);
           text("Seleziona un brano per vedere il musicogramma", width / 2, height / 2);
           return;
         }
-        imageMode(
 
+        imageMode(CENTER);
+        const imgW = width * 0.8, imgH = height * 0.8;
+        image(currentImg, width / 2, height / 2, imgW, imgH);
 
+        if (currentTrack.isPlaying()) drawPointer(imgW, imgH);
+      }
 
+      function drawPointer(imgW, imgH) {
+        const t = currentTrack.currentTime();
+        const d = currentTrack.duration();
+        if (!d || d <= 0) return;
+
+        let progress = constrain((t / d) * syncFactor, 0, 1);
+        const n = currentPath.length;
+        const idx = Math.min(Math.floor(progress * n), n - 1);
+        const pos = currentPath[idx];
+
+        const x = width * 0.1 + pos.u * imgW;
+        const y = height * 0.1 + pos.v * imgH;
+
+        const pulse = 4 * sin(frameCount * 0.25);
+        fill(0, 120, 255, 220);
+        noStroke();
+        ellipse(x, y, 24 + pulse);
+      }
+
+      function selectTrack(name) {
+        stopTrack();
+        if (name === "danza") {
+          currentTrack = danzaAudio;
+          currentImg = danzaImg;
+          currentName = "Danza delle ore";
+          currentPath = pathDanza;
+          syncFactor = 0.73; // tarato per ritmo del brano
+        } else {
+          currentTrack = sarabandaAudio;
+          currentImg = sarabandaImg;
+          currentName = "Sarabanda";
+          currentPath = pathSarabanda;
+          syncFactor = 1.0;
+        }
+        document.getElementById("status").textContent = `Brano selezionato: ${currentName}`;
+      }
+
+      function togglePlayPause() {
+        if (!currentTrack) {
+          alert("Seleziona prima un brano!");
+          return;
+        }
+        userStartAudio().then(() => {
+          if (!currentTrack.isPlaying()) {
+            currentTrack.play();
+            document.getElementById("status").textContent = `▶️ Riproduzione: ${currentName}`;
+          } else {
+            currentTrack.pause();
+            document.getElementById("status").textContent = `⏸ Pausa`;
+          }
+        });
+      }
+
+      function stopTrack() {
+        if (danzaAudio) danzaAudio.stop();
+        if (sarabandaAudio) sarabandaAudio.stop();
+        document.getElementById("status").textContent = "⏹ Riproduzione interrotta.";
+      }
+
+      function keyPressed() {
+        if (key === " ") { togglePlayPause(); return false; }
+        if (key === "s" || key === "S") { stopTrack(); return false; }
+      }
+    </script>
+  </body>
+</html>
 
 
 
