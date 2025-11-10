@@ -267,9 +267,9 @@
         // progress 0..1 sul brano
         let progress = constrain(t / d, 0, 1);
 
-        // piccolo fattore di velocità per Danza (se ti sembra lento)
+        // fattore di velocità per Danza (più alto = più veloce)
         if (currentTrack === danzaAudio) {
-          const speedFactor = 1.1; // prova 1.1, se è lento 1.2
+          const speedFactor = 1.6; // prova 1.6; se troppo, scendi a 1.4
           progress = constrain(progress * speedFactor, 0, 1);
         }
 
