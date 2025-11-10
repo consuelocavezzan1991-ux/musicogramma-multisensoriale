@@ -110,7 +110,8 @@
       let currentPath = null;
 
       // ---------------------------------------------------------------------
-      //  PERCORSO "DANZA DELLE ORE"
+      //  PERCORSO "DANZA DELLE ORE" - dai tuoi clic
+      //  p = progressione (0 inizio brano, 1 fine brano)
       // ---------------------------------------------------------------------
       let pathDanza = [
         { p: 0.00, u: 0.08, v: 0.07 },
@@ -148,7 +149,7 @@
       ];
 
       // ---------------------------------------------------------------------
-      //  PERCORSO "SARABANDA" (esempio provvisorio)
+      //  PERCORSO "SARABANDA" – semplice di esempio
       // ---------------------------------------------------------------------
       let pathSarabanda = [
         { p: 0.00, u: 0.10, v: 0.08 },
@@ -180,10 +181,14 @@
         textAlign(CENTER, CENTER);
         textSize(18);
 
-        document.getElementById("btn-danza").addEventListener("click", () => selectTrack("danza"));
-        document.getElementById("btn-sarabanda").addEventListener("click", () => selectTrack("sarabanda"));
-        document.getElementById("btn-play").addEventListener("click", togglePlayPause);
-        document.getElementById("btn-stop").addEventListener("click", stopTrack);
+        document.getElementById("btn-danza")
+          .addEventListener("click", () => selectTrack("danza"));
+        document.getElementById("btn-sarabanda")
+          .addEventListener("click", () => selectTrack("sarabanda"));
+        document.getElementById("btn-play")
+          .addEventListener("click", togglePlayPause);
+        document.getElementById("btn-stop")
+          .addEventListener("click", stopTrack);
 
         setStatus("Pronto. Seleziona un brano e poi premi Play.");
       }
@@ -193,10 +198,12 @@
       // ---------------------------------------------------------------------
       function draw() {
         background(244);
+
         if (!currentTrack || !currentImg) {
           fill(80);
           textSize(22);
-          text("Seleziona un brano per vedere il musicogramma", width / 2, height / 2);
+          text("Seleziona un brano per vedere il musicogramma",
+               width / 2, height / 2);
           return;
         }
 
@@ -204,17 +211,21 @@
         const imgW = width * 0.8;
         const imgH = height * 0.8;
 
+        // Bordo bianco
         fill(255);
         noStroke();
         rectMode(CENTER);
         rect(width / 2, height / 2, imgW + 8, imgH + 8, 18);
 
+        // Musicogramma
         image(currentImg, width / 2, height / 2, imgW, imgH);
 
+        // Testo
         fill(20);
         noStroke();
         textSize(26);
         text(currentName, width / 2, 30);
+
         textSize(14);
         if (currentTrack.isPlaying()) {
           fill(40, 160, 90);
@@ -230,29 +241,18 @@
       }
 
       // ---------------------------------------------------------------------
-      //  DISEGNO DEL PALLINO
+      //  PALLINO – segue il brano, una figura dopo l’altra
       // ---------------------------------------------------------------------
       function drawPointer(imgW, imgH) {
         const t = currentTrack.currentTime();
         const d = currentTrack.duration();
         if (!d || d <= 0 || !currentPath || currentPath.length === 0) return;
 
-        const baseProgress = constrain(t / d, 0, 1);
-
-        // pallino più lento → anticipo ridotto
-        let pathProgress;
-        if (currentTrack === danzaAudio) {
-          const offset = 0.01; // ridotto per rallentare il pallino
-          pathProgress = constrain(baseProgress + offset, 0, 1);
-        } else {
-          pathProgress = baseProgress;
-        }
+        // progress esatto dell'audio (0..1)
+        const pathProgress = constrain(t / d, 0, 1);
 
         const pos = getPositionAtProgress(pathProgress, currentPath);
         if (!pos) return;
-
-        const windowWidth = 0.02;
-        if (pathProgress < pos.p || pathProgress > pos.p + windowWidth) return;
 
         const imgX = width / 2 - imgW / 2;
         const imgY = height / 2 - imgH / 2;
@@ -264,26 +264,40 @@
         const r = baseSize + pulse;
 
         noStroke();
-        const col = currentTrack === danzaAudio ? color(0, 140, 255, 220) : color(255, 80, 150, 220);
+        const col = (currentTrack === danzaAudio)
+          ? color(0, 140, 255, 220)
+          : color(255, 80, 150, 220);
+
         fill(col);
         ellipse(x, y, r * 2);
+
         fill(red(col), green(col), blue(col), 70);
         ellipse(x, y, r * 3.2);
       }
 
       // ---------------------------------------------------------------------
-      //  POSIZIONE DEL PALLINO
+      //  POSIZIONE DEL PALLINO:
+      //  sceglie l'ULTIMO punto con p_i <= progress
+      //  → niente diagonali "strane", niente salti della prima figura
       // ---------------------------------------------------------------------
       function getPositionAtProgress(p, path) {
         if (!path || path.length === 0) return null;
-        if (p <= path[0].p) return { u: path[0].u, v: path[0].v, p: path[0].p };
+
+        // Prima del primo punto → resta sul primo
+        if (p <= path[0].p) {
+          return { u: path[0].u, v: path[0].v };
+        }
 
         let idx = 0;
         for (let i = 1; i < path.length; i++) {
-          if (p >= path[i].p) idx = i;
-          else break;
+          if (p >= path[i].p) {
+            idx = i;
+          } else {
+            break;
+          }
         }
-        return { u: path[idx].u, v: path[idx].v, p: path[idx].p };
+
+        return { u: path[idx].u, v: path[idx].v };
       }
 
       // ---------------------------------------------------------------------
@@ -291,6 +305,7 @@
       // ---------------------------------------------------------------------
       function selectTrack(name) {
         stopTrack();
+
         if (name === "danza") {
           currentTrack = danzaAudio;
           currentImg = danzaImg;
@@ -302,6 +317,7 @@
           currentName = "Sarabanda";
           currentPath = pathSarabanda;
         }
+
         setStatus(`Brano selezionato: ${currentName}. Premi "Play" per avviare.`);
       }
 
@@ -310,6 +326,7 @@
           setStatus("Seleziona prima un brano.");
           return;
         }
+
         userStartAudio().then(() => {
           if (!currentTrack.isPlaying()) {
             currentTrack.play();
@@ -348,9 +365,6 @@
     </script>
   </body>
 </html>
-
-
-
 
 
 
