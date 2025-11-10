@@ -260,7 +260,7 @@
         const n = currentPath.length;
 
         // anticipo fisso del pallino rispetto all'audio (in secondi)
-        const leadSeconds = 0.8; // puoi provare 0.6 / 1.0 se serve
+        const leadSeconds = 1.0; // puoi provare 0.6 / 1.0 se serve
         let tAdjusted = t + leadSeconds;
         if (tAdjusted > d) tAdjusted = d;
 
@@ -365,6 +365,7 @@
     </script>
   </body>
 </html>
+
 
 
 
