@@ -85,7 +85,6 @@
 
     <div id="canvas-container"></div>
 
-    <!-- p5.js + p5.sound -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.sound.min.js"></script>
 
@@ -99,7 +98,7 @@
       let currentPath = null;
       let currentDurations = null;
 
-      // velocità globale del pallino (più grande = più veloce)
+      // velocità globale del pallino (più grande = più veloce della musica)
       let speedFactor = 1.0;
 
       // per quanti secondi resta fermo sulla prima figura all'inizio
@@ -143,16 +142,17 @@
       ];
 
       // Durate relative (pesi)
-      // 9 -> 3, 19 -> 3, 20 -> 4, 21 -> 3, 22 -> 4
+      // 9, 19, 21 un po' più lunghe (2)
+      // 20, 22 ancora più lunghe (4)
       const durationsDanza = [
         1, 1, 1, 1,   // 1–4
         1, 1, 1, 1,   // 5–8
-        3,            // 9
+        2,            // 9 (prima 3)
         1, 1, 1, 1,   // 10–13
         1, 1, 1, 1, 1,// 14–18
-        3,            // 19
+        2,            // 19 (prima 3)
         4,            // 20
-        3,            // 21
+        2,            // 21 (prima 3)
         4,            // 22
         1, 1, 1, 1, 1, 1, 1, 1, 1 // 23–31
       ];
@@ -260,7 +260,7 @@
         const totalWeight = currentDurations.reduce((a, b) => a + b, 0);
         const totalTime = d / speedFactor; // più piccolo = più veloce del brano
 
-        // calcolo tempi cumulativi per ogni figura
+        // calcolo tempi cumulativi per ogni figura in base ai pesi
         const times = [];
         let sum = 0;
         for (let w of currentDurations) {
@@ -322,8 +322,8 @@
           currentPath = pathDanza;
           currentDurations = durationsDanza;
 
-          // 💡 qui controlli la velocità globale del pallino
-          speedFactor = 2.75; // leggermente più lento di 3.0
+          // velocità globale del pallino per "Danza"
+          speedFactor = 2.75;
           startHold = 0.6;
         } else {
           currentTrack = sarabandaAudio;
@@ -380,7 +380,6 @@
     </script>
   </body>
 </html>
-
 
 
 
