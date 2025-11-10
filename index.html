@@ -111,6 +111,9 @@
       // offset percentuale sulla timeline: negativo = pallino in anticipo
       let leadPercent = 0.0;
 
+      // offset sull'indice delle figure: negativo = sposta il pallino verso le prime figure
+      let indexOffset = 0;
+
       // -------------------------------------------------------------
       //  PUNTI DANZA DELLE ORE
       // -------------------------------------------------------------
@@ -250,7 +253,7 @@
       }
 
       // -------------------------------------------------------------
-      //  PALLINO – sincronizzato con percentuale + anticipo
+      //  PALLINO – sincronizzato con percentuale + anticipo + offset figura
       // -------------------------------------------------------------
       function drawPointer(imgW, imgH) {
         const t = currentTrack.currentTime();
@@ -268,8 +271,12 @@
         // limitiamo tra 0 e poco meno di 1 per non oltrepassare l'array
         progress = constrain(progress, 0, 0.999);
 
-        // indice nel path
-        const idx = Math.floor(progress * n);
+        // indice nel path + offset di figura
+        let idx = Math.floor(progress * n) + indexOffset;
+
+        // limitiamo l'indice tra 0 e n-1
+        idx = constrain(idx, 0, n - 1);
+
         const pos = currentPath[idx];
 
         // coordinate dell'immagine
@@ -308,16 +315,23 @@
           currentName = "Danza delle ore";
           currentPath = pathDanza;
 
-          // prova questo anticipo; aggiusta a orecchio (es. -0.03, -0.05…)
+          // anticipo temporale (percentuale del brano)
           leadPercent = -0.04;
+
+          // riportiamo il pallino "indietro" di 2 posizioni
+          // così parte dalla prima figura invece che dalla terza
+          indexOffset = -2;
         } else if (name === "sarabanda") {
           currentTrack = sarabandaAudio;
           currentImg = sarabandaImg;
           currentName = "Sarabanda";
           currentPath = pathSarabanda;
 
-          // qui magari serve meno anticipo
+          // qui magari serve meno anticipo temporale
           leadPercent = -0.02;
+
+          // nessun offset sulle figure
+          indexOffset = 0;
         }
 
         setStatus(
@@ -367,7 +381,6 @@
     </script>
   </body>
 </html>
-
 
 
 
