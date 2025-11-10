@@ -93,14 +93,13 @@
 
     <div id="status">Pronto. Seleziona un brano e poi premi Play.</div>
 
-    <!-- Qui dentro p5.js inserirà il canvas -->
     <div id="canvas-container"></div>
 
     <!-- p5.js + p5.sound -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.sound.min.js"></script>
 
-    <!-- TUTTO IL TUO SKETCH QUI DENTRO -->
+    <!-- TUTTO LO SKETCH -->
     <script>
       let danzaAudio, sarabandaAudio;
       let danzaImg, sarabandaImg;
@@ -111,55 +110,52 @@
       let currentPath = null;    // percorso attivo per il pallino
 
       // ---------------------------------------------------------------------
-      //  PERCORSI DEL PALLINO (bozza: poi li puoi sostituire con i tuoi punti)
+      //  PERCORSI DEL PALLINO
       //  p = progressione (0 inizio brano, 1 fine brano)
       //  u = orizzontale (0 sinistra, 1 destra)
       //  v = verticale   (0 alto,    1 basso)
       // ---------------------------------------------------------------------
 
-      // Danza delle ore
-// Danza delle ore – percorso ESATTAMENTE dai tuoi clic (senza riscalare il tempo)
-let pathDanza = [
-  { p: 0.00, u: 0.08, v: 0.07 },
-  { p: 0.01, u: 0.22, v: 0.06 },
-  { p: 0.02, u: 0.29, v: 0.07 },
-  { p: 0.03, u: 0.47, v: 0.07 },
-  { p: 0.04, u: 0.69, v: 0.07 },
-  { p: 0.05, u: 0.46, v: 0.13 },
-  { p: 0.06, u: 0.25, v: 0.16 },
-  { p: 0.07, u: 0.46, v: 0.15 },
-  { p: 0.08, u: 0.60, v: 0.14 },
-  { p: 0.09, u: 0.73, v: 0.15 },
-  { p: 0.10, u: 0.46, v: 0.20 },
-  { p: 0.11, u: 0.22, v: 0.26 },
-  { p: 0.12, u: 0.29, v: 0.27 },
-  { p: 0.13, u: 0.47, v: 0.26 },
-  { p: 0.14, u: 0.68, v: 0.27 },
-  { p: 0.15, u: 0.46, v: 0.30 },
-  { p: 0.17, u: 0.26, v: 0.37 },
-  { p: 0.18, u: 0.47, v: 0.34 },
-  { p: 0.19, u: 0.60, v: 0.34 },
-  { p: 0.20, u: 0.59, v: 0.37 },
-  { p: 0.23, u: 0.25, v: 0.46 },
-  { p: 0.24, u: 0.42, v: 0.46 },
-  { p: 0.25, u: 0.54, v: 0.48 },
-  { p: 0.26, u: 0.52, v: 0.53 },
-  { p: 0.28, u: 0.25, v: 0.59 },
-  { p: 0.29, u: 0.53, v: 0.60 },
-  { p: 0.30, u: 0.70, v: 0.59 },
-  { p: 0.31, u: 0.46, v: 0.66 },
-  { p: 0.32, u: 0.20, v: 0.73 },
-  { p: 0.33, u: 0.28, v: 0.78 },
-  { p: 0.34, u: 0.24, v: 0.84 },
-  { p: 0.35, u: 0.47, v: 0.84 },
-  { p: 0.36, u: 0.38, v: 0.91 },
-  { p: 0.37, u: 0.33, v: 0.95 },
-  { p: 0.38, u: 0.56, v: 0.93 },
-];
+      // Danza delle ore – percorso ESATTAMENTE dai tuoi clic (senza riscalare il tempo)
+      let pathDanza = [
+        { p: 0.00, u: 0.08, v: 0.07 },
+        { p: 0.01, u: 0.22, v: 0.06 },
+        { p: 0.02, u: 0.29, v: 0.07 },
+        { p: 0.03, u: 0.47, v: 0.07 },
+        { p: 0.04, u: 0.69, v: 0.07 },
+        { p: 0.05, u: 0.46, v: 0.13 },
+        { p: 0.06, u: 0.25, v: 0.16 },
+        { p: 0.07, u: 0.46, v: 0.15 },
+        { p: 0.08, u: 0.60, v: 0.14 },
+        { p: 0.09, u: 0.73, v: 0.15 },
+        { p: 0.10, u: 0.46, v: 0.20 },
+        { p: 0.11, u: 0.22, v: 0.26 },
+        { p: 0.12, u: 0.29, v: 0.27 },
+        { p: 0.13, u: 0.47, v: 0.26 },
+        { p: 0.14, u: 0.68, v: 0.27 },
+        { p: 0.15, u: 0.46, v: 0.30 },
+        { p: 0.17, u: 0.26, v: 0.37 },
+        { p: 0.18, u: 0.47, v: 0.34 },
+        { p: 0.19, u: 0.60, v: 0.34 },
+        { p: 0.20, u: 0.59, v: 0.37 },
+        { p: 0.23, u: 0.25, v: 0.46 },
+        { p: 0.24, u: 0.42, v: 0.46 },
+        { p: 0.25, u: 0.54, v: 0.48 },
+        { p: 0.26, u: 0.52, v: 0.53 },
+        { p: 0.28, u: 0.25, v: 0.59 },
+        { p: 0.29, u: 0.53, v: 0.60 },
+        { p: 0.30, u: 0.70, v: 0.59 },
+        { p: 0.31, u: 0.46, v: 0.66 },
+        { p: 0.32, u: 0.20, v: 0.73 },
+        { p: 0.33, u: 0.28, v: 0.78 },
+        { p: 0.34, u: 0.24, v: 0.84 },
+        { p: 0.35, u: 0.47, v: 0.84 },
+        { p: 0.36, u: 0.38, v: 0.91 },
+        { p: 0.37, u: 0.33, v: 0.95 },
+        { p: 0.38, u: 0.56, v: 0.93 },
+      ];
 
-
-
-      // Sarabanda
+      // Sarabanda – percorso base (puoi rifarlo con lo stesso metodo quando vuoi)
       let pathSarabanda = [
         { p: 0.00, u: 0.10, v: 0.08 },
         { p: 0.15, u: 0.20, v: 0.25 },
@@ -168,7 +164,7 @@ let pathDanza = [
         { p: 0.60, u: 0.60, v: 0.50 },
         { p: 0.75, u: 0.75, v: 0.65 },
         { p: 0.90, u: 0.88, v: 0.80 },
-        { p: 1.00, u: 0.92, v: 0.92 }
+        { p: 1.00, u: 0.92, v: 0.92 },
       ];
 
       // ---------------------------------------------------------------------
@@ -262,14 +258,30 @@ let pathDanza = [
       }
 
       // ---------------------------------------------------------------------
-      //  PALLINO
+      //  PALLINO (con speedFactor per Danza)
       // ---------------------------------------------------------------------
       function drawPointer(imgW, imgH) {
-        const t = currentTrack.currentTime();
-        const d = currentTrack.duration();
+        const t = currentTrack.currentTime();   // tempo corrente
+        const d = currentTrack.duration();      // durata totale
         if (!d || d <= 0) return;
 
-        const progress = constrain(t / d, 0, 1);
+        // progress base 0..1
+        let baseProgress = t / d;
+        let progress;
+
+        if (currentTrack === danzaAudio) {
+          // ⚙️ Regola qui se vuoi velocizzare/anticipare Danza delle ore
+          const speedFactor = 1.7;   // >1 = più veloce (prova 1.5–2.0)
+          const offset = 0.02;       // quanto anticipare (0.0–0.05 circa)
+
+          progress = (baseProgress - offset) * speedFactor;
+        } else {
+          // Sarabanda normale
+          progress = baseProgress;
+        }
+
+        progress = constrain(progress, 0, 1);
+
         const pos = getPositionAtProgress(progress, currentPath);
         if (!pos) return;
 
@@ -413,7 +425,6 @@ let pathDanza = [
     </script>
   </body>
 </html>
-
 
 
 
