@@ -99,20 +99,13 @@
       let currentPath = null;
       let currentDurations = null;
 
-      // fattore velocità globale (di solito basta 1.0)
-      let speedFactor = 1.0;
-      // fermo iniziale sulla prima figura
-      let startHold = 0.0;
+      let speedFactor = 1.0; // fattore globale (per Danza useremo la durata virtuale 65s)
+      let startHold = 0.0;   // fermo iniziale
 
-      // ----------- PARAMETRI SPECIFICI PER "DANZA DELLE ORE" ------------
+      // ----------------- PARAMETRI DANZA -------------------
 
-      // punto di inizio (in secondi) della frase del musicogramma nel file mp3
-      const danzaSegmentStart = 0.0;
-
-      // durata (in secondi) della frase che corrisponde alle 31 figure
-      // -> se il pallino è TROPPO LENTO, diminuisci (es. 18, 16...)
-      // -> se il pallino è troppo veloce, aumenta (es. 22, 24...)
-      const danzaSegmentLength = 70.0;
+      const danzaSegmentStart = 0.0;   // da quando inizia la frase (in secondi)
+      const danzaSegmentLength = 65.0; // durata virtuale (ti andava bene questo valore)
 
       // -------------------------------------------------------------
       //  PUNTI DANZA DELLE ORE (31 figure)
@@ -152,45 +145,41 @@
       ];
 
       // -------------------------------------------------------------
-      //  DURATE RELATIVE DANZA
-      //  1–8 tutte uguali (niente rallentamento 4→5)
-      //  9, 19, 21 = doppie
-      //  20, 22    = quadruple
+      //  LE TUE DURATE RELATIVE (31 valori)
       // -------------------------------------------------------------
-     const durationsDanza = [
-        1,   // 1
-        0.7,   // 2
-        0.7,   // 3
-        0.7,   // 4
-        1,   // 5
-        1,   // 6
-        0.4, // 7 (un po' più rapido)
-        0.4, // 8 (un po' più rapido)
-        0.4,   // 9
-        0.4,   // 10
-        0.4   // 11
-        0.4,   // 12
-        0.4,   // 13
-        0.7,   // 14
-        0.7,   // 15
-        0.4,   // 16
-        0.4,   // 17
-        0.4,   // 18
-        1,   // 19
-        1.2,   // 20
-        1,   // 21
-        1.2,   // 22
-        0.7,   // 23
-        0.7,   // 24
-        0.4,   // 25
-        0.4,   // 26
-        0.4,   // 27
-        0.4,   // 28
-        0.4,   // 29
-        0.4,   // 30
-        0.4,   // 31
+      const durationsDanza = [
+        1,    // 1
+        0.7,  // 2
+        0.7,  // 3
+        0.7,  // 4
+        1,    // 5
+        1,    // 6
+        0.4,  // 7
+        0.4,  // 8
+        0.4,  // 9
+        0.4,  // 10
+        0.4,  // 11
+        0.4,  // 12
+        0.4,  // 13
+        0.7,  // 14
+        0.7,  // 15
+        0.4,  // 16
+        0.4,  // 17
+        0.4,  // 18
+        1,    // 19
+        1.2,  // 20
+        1,    // 21
+        1.2,  // 22
+        0.7,  // 23
+        0.7,  // 24
+        0.4,  // 25
+        0.4,  // 26
+        0.4,  // 27
+        0.4,  // 28
+        0.4,  // 29
+        0.4,  // 30
+        0.4   // 31
       ];
-
 
       // -------------------------------------------------------------
       //  SARABANDA (semplice, tutte uguali)
@@ -236,10 +225,10 @@
           .addEventListener("click", () => selectTrack("sarabanda"));
         document
           .getElementById("btn-play")
-          .addEventListener("click", togglePlayPause);
+          .addEventListener("click", () => togglePlayPause());
         document
           .getElementById("btn-stop")
-          .addEventListener("click", stopTrack);
+          .addEventListener("click", () => stopTrack());
       }
 
       // -------------------------------------------------------------
@@ -276,7 +265,8 @@
         textSize(20);
         text(currentName, width / 2, 30);
 
-        if (currentTrack && currentTrack.isPlaying() && currentPath && currentDurations) {
+        // pallino
+        if (currentTrack && currentTrack.isPlaying() && currentPath) {
           if (currentTrack === danzaAudio) {
             drawPointerDanza(imgW, imgH);
           } else {
@@ -286,13 +276,11 @@
       }
 
       // -------------------------------------------------------------
-      //  PALLINO – DANZA (usa solo la finestra musicaSegmento)
+      //  PALLINO – DANZA (usa durata virtuale 65s + tue durate)
       // -------------------------------------------------------------
       function drawPointerDanza(imgW, imgH) {
-        const t = currentTrack.currentTime();
-
-        // tempo relativo alla frase che ti interessa
-        let tSeg = t - danzaSegmentStart;
+        const t = currentTrack.currentTime(); // tempo reale audio
+        let tSeg = t - danzaSegmentStart;     // tempo relativo alla frase
 
         if (tSeg <= 0) {
           drawDot(pathDanza[0], imgW, imgH);
@@ -304,7 +292,7 @@
           return;
         }
 
-        // progressione 0..1 SOLO sulla frase (non su tutta la durata del file)
+        // progressione 0..1 sulla durata VIRTUALE
         let progress = (tSeg / danzaSegmentLength) * speedFactor;
         if (progress < 0) progress = 0;
         if (progress > 0.999) progress = 0.999;
@@ -331,7 +319,7 @@
       function drawPointerGeneric(imgW, imgH) {
         const t = currentTrack.currentTime();
         const d = currentTrack.duration();
-        if (!d) return;
+        if (!d || !currentDurations) return;
 
         if (t < startHold) {
           drawDot(currentPath[0], imgW, imgH);
@@ -394,8 +382,8 @@
           currentPath = pathDanza;
           currentDurations = durationsDanza;
 
-          // adesso si usa SOLO danzaSegmentLength per la frase
-          speedFactor = 1.0;
+          // qui puoi fare micro-aggiustamenti globali se serve
+          speedFactor = 1.0;  // se tutto è un filo lento → 1.05, se veloce → 0.95
           startHold = 0.0;
         } else {
           currentTrack = sarabandaAudio;
@@ -452,7 +440,6 @@
     </script>
   </body>
 </html>
-
 
 
 
