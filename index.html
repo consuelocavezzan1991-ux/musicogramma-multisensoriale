@@ -99,19 +99,15 @@
       let currentPath = null;
       let currentDurations = null;
 
-      // fattore velocità globale (di solito basta 1.0)
       let speedFactor = 1.0;
-      // fermo iniziale sulla prima figura
       let startHold = 0.0;
 
       // ----------- PARAMETRI SPECIFICI PER "DANZA DELLE ORE" ------------
 
-      // punto di inizio (in secondi) della frase del musicogramma nel file mp3
+      // punto di inizio (in secondi) nel file mp3
       const danzaSegmentStart = 0.0;
 
       // durata (in secondi) della frase che corrisponde alle 31 figure
-      // -> se il pallino è TROPPO LENTO, diminuisci (es. 18, 16...)
-      // -> se il pallino è troppo veloce, aumenta (es. 22, 24...)
       const danzaSegmentLength = 70.0;
 
       // -------------------------------------------------------------
@@ -153,42 +149,44 @@
 
       // -------------------------------------------------------------
       //  DURATE RELATIVE DANZA
-      //  1–8 tutte uguali (niente rallentamento 4→5)
-      //  9, 19, 21 = doppie
-      //  20, 22    = quadruple
+      //  1–6 = 1
+      //  7–8 = 0.7 (leggermente più veloci)
+      //  9,19,21 = 2
+      //  20,22    = 4
+      //  resto = 1
       // -------------------------------------------------------------
       const durationsDanza = [
-        1, // 1
-        1, // 2
-        1, // 3
-        1, // 4
-        1, // 5
-        1, // 6
-        1, // 7
-        1, // 8
-        2, // 9
-        1, // 10
-        1, // 11
-        1, // 12
-        1, // 13
-        1, // 14
-        1, // 15
-        1, // 16
-        1, // 17
-        1, // 18
-        2, // 19
-        4, // 20
-        2, // 21
-        4, // 22
-        1, // 23
-        1, // 24
-        1, // 25
-        1, // 26
-        1, // 27
-        1, // 28
-        1, // 29
-        1, // 30
-        1  // 31
+        1,   // 1
+        1,   // 2
+        1,   // 3
+        1,   // 4
+        1,   // 5
+        1,   // 6
+        0.7, // 7 (un po' più rapido)
+        0.7, // 8 (un po' più rapido)
+        2,   // 9
+        1,   // 10
+        1,   // 11
+        1,   // 12
+        1,   // 13
+        1,   // 14
+        1,   // 15
+        1,   // 16
+        1,   // 17
+        1,   // 18
+        2,   // 19
+        4,   // 20
+        2,   // 21
+        4,   // 22
+        1,   // 23
+        1,   // 24
+        1,   // 25
+        1,   // 26
+        1,   // 27
+        1,   // 28
+        1,   // 29
+        1,   // 30
+        1    // 31
       ];
 
       // -------------------------------------------------------------
@@ -235,7 +233,7 @@
           .addEventListener("click", () => selectTrack("sarabanda"));
         document
           .getElementById("btn-play")
-          .addEventListener("click", togglePlayPause);
+          .addEventListener("click", () => togglePlayPause);
         document
           .getElementById("btn-stop")
           .addEventListener("click", stopTrack);
@@ -285,12 +283,12 @@
       }
 
       // -------------------------------------------------------------
-      //  PALLINO – DANZA (usa solo la finestra musicaSegmento)
+      //  PALLINO – DANZA (usa solo la finestra del segmento)
       // -------------------------------------------------------------
       function drawPointerDanza(imgW, imgH) {
         const t = currentTrack.currentTime();
 
-        // tempo relativo alla frase che ti interessa
+        // tempo relativo alla frase di interesse
         let tSeg = t - danzaSegmentStart;
 
         if (tSeg <= 0) {
@@ -303,7 +301,6 @@
           return;
         }
 
-        // progressione 0..1 SOLO sulla frase (non su tutta la durata del file)
         let progress = (tSeg / danzaSegmentLength) * speedFactor;
         if (progress < 0) progress = 0;
         if (progress > 0.999) progress = 0.999;
@@ -393,7 +390,7 @@
           currentPath = pathDanza;
           currentDurations = durationsDanza;
 
-          // adesso si usa SOLO danzaSegmentLength per la frase
+          // per Danza usiamo solo danzaSegmentLength
           speedFactor = 1.0;
           startHold = 0.0;
         } else {
@@ -451,22 +448,6 @@
     </script>
   </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
