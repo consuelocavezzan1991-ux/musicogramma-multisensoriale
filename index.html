@@ -61,7 +61,25 @@
       #canvas-container {
         background: transparent;
         border-radius: 16px;
-        margin-bottom: 30px;
+        margin-bottom: 10px;
+      }
+      #log-box {
+        max-width: 900px;
+        padding: 8px 12px;
+        margin-bottom: 20px;
+        font-size: 0.8rem;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      }
+      #log-box h2 {
+        margin: 0 0 4px;
+        font-size: 0.9rem;
+      }
+      #log-sarabanda {
+        white-space: pre-wrap;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+          "Liberation Mono", "Courier New", monospace;
       }
     </style>
   </head>
@@ -85,6 +103,14 @@
 
     <div id="canvas-container"></div>
 
+    <div id="log-box">
+      <h2>Punti Sarabanda registrati (clicca sul musicogramma)</h2>
+      <div style="margin-bottom:4px; color:#555; font-size:0.8rem;">
+        1. Clicca "Sarabanda" • 2. Clicca sui simboli nell'ordine • 3. Copia i punti sotto o guarda la console (F12)
+      </div>
+      <pre id="log-sarabanda">// in attesa di click su Sarabanda…</pre>
+    </div>
+
     <!-- p5.js + p5.sound -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.sound.min.js"></script>
@@ -99,14 +125,20 @@
       let currentPath = null;
       let currentDurations = null;
 
-      // mantengo il valore che hai indicato
+      // valore iniziale globale
       let speedFactor = 3.0;
       let startHold = 0.0;
 
-      // ----------------- PARAMETRI DANZA -------------------
+      // per registrare i punti di Sarabanda
+      let recordedSarabanda = [];
 
+      // ----------------- PARAMETRI DANZA -------------------
       const danzaSegmentStart = 0.0;
       const danzaSegmentLength = 55.0; // tuo valore
+
+      // ----------------- PARAMETRI SARABANDA ---------------
+      const sarabandaSegmentStart = 0.0;
+      const sarabandaSegmentLength = 40.0; // regoli come vuoi
 
       // -------------------------------------------------------------
       //  PUNTI DANZA DELLE ORE (31 figure)
@@ -146,7 +178,7 @@
       ];
 
       // -------------------------------------------------------------
-      //  DURATE RELATIVE DANZA (31 valori) – mantengo le tue
+      //  DURATE RELATIVE DANZA (31 valori) – tuoi valori
       // -------------------------------------------------------------
       const durationsDanza = [
         1.0,  // 1
@@ -183,9 +215,9 @@
       ];
 
       // -------------------------------------------------------------
-      //  SARABANDA (semplice, tutte uguali)
+      //  SARABANDA – punti PROVVISORI (li sostituiremo con quelli registrati)
       // -------------------------------------------------------------
-      const pathSarabanda = [
+      let pathSarabanda = [
         { u: 0.1, v: 0.1 },
         { u: 0.25, v: 0.2 },
         { u: 0.4, v: 0.3 },
@@ -197,7 +229,20 @@
         { u: 0.4, v: 0.88 },
         { u: 0.25, v: 0.92 }
       ];
-      const durationsSarabanda = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+
+      // per ora tutte uguali: poi le cambierai come per Danza
+      let durationsSarabanda = [
+        1, // 1
+        1, // 2
+        1, // 3
+        1, // 4
+        1, // 5
+        1, // 6
+        1, // 7
+        1, // 8
+        1, // 9
+        1  // 10
+      ];
 
       // -------------------------------------------------------------
       //  PRELOAD
@@ -270,8 +315,8 @@
         if (currentTrack && currentTrack.isPlaying() && currentPath) {
           if (currentTrack === danzaAudio) {
             drawPointerDanza(imgW, imgH);
-          } else {
-            drawPointerGeneric(imgW, imgH);
+          } else if (currentTrack === sarabandaAudio) {
+            drawPointerSarabanda(imgW, imgH);
           }
         }
       }
@@ -314,37 +359,40 @@
       }
 
       // -------------------------------------------------------------
-      //  PALLINO – GENERICO (Sarabanda)
+      //  PALLINO – SARABANDA
       // -------------------------------------------------------------
-      function drawPointerGeneric(imgW, imgH) {
+      function drawPointerSarabanda(imgW, imgH) {
         const t = currentTrack.currentTime();
-        const d = currentTrack.duration();
-        if (!d || !currentDurations) return;
+        let tSeg = t - sarabandaSegmentStart;
 
-        if (t < startHold) {
-          drawDot(currentPath[0], imgW, imgH);
+        if (tSeg <= 0) {
+          drawDot(pathSarabanda[0], imgW, imgH);
           return;
         }
 
-        const tEff = t - startHold;
-        let progress = (tEff / d) * speedFactor;
+        if (tSeg >= sarabandaSegmentLength) {
+          drawDot(pathSarabanda[pathSarabanda.length - 1], imgW, imgH);
+          return;
+        }
+
+        let progress = (tSeg / sarabandaSegmentLength) * speedFactor;
         if (progress < 0) progress = 0;
         if (progress > 0.999) progress = 0.999;
 
-        const totalWeight = currentDurations.reduce((a, b) => a + b, 0);
+        const totalWeight = durationsSarabanda.reduce((a, b) => a + b, 0);
         const target = progress * totalWeight;
 
         let cum = 0;
-        let idx = currentPath.length - 1;
-        for (let i = 0; i < currentDurations.length; i++) {
-          cum += currentDurations[i];
+        let idx = pathSarabanda.length - 1;
+        for (let i = 0; i < durationsSarabanda.length; i++) {
+          cum += durationsSarabanda[i];
           if (target <= cum) {
             idx = i;
             break;
           }
         }
 
-        drawDot(currentPath[idx], imgW, imgH);
+        drawDot(pathSarabanda[idx], imgW, imgH);
       }
 
       // -------------------------------------------------------------
@@ -370,6 +418,65 @@
       }
 
       // -------------------------------------------------------------
+      //  REGISTRAZIONE PUNTI SARABANDA (CLICK)
+      // -------------------------------------------------------------
+      function mousePressed() {
+        // registra solo quando il musicogramma corrente è Sarabanda
+        if (currentImg !== sarabandaImg) return;
+
+        const imgW = width * 0.8;
+        const imgH = height * 0.8;
+        const imgX = width / 2 - imgW / 2;
+        const imgY = height / 2 - imgH / 2;
+
+        // controlliamo che il click sia dentro l'immagine
+        if (
+          mouseX < imgX || mouseX > imgX + imgW ||
+          mouseY < imgY || mouseY > imgY + imgH
+        ) {
+          return;
+        }
+
+        let u = (mouseX - imgX) / imgW;
+        let v = (mouseY - imgY) / imgH;
+
+        // limitiamo tra 0 e 1
+        u = Math.min(Math.max(u, 0), 1);
+        v = Math.min(Math.max(v, 0), 1);
+
+        const point = { u: u, v: v };
+        recordedSarabanda.push(point);
+
+        // LOG IN CONSOLE (come ieri)
+        console.log(
+          `Punto ${recordedSarabanda.length}: { u: ${u.toFixed(2)}, v: ${v.toFixed(2)} }`
+        );
+
+        // aggiorniamo il log testuale sotto
+        updateSarabandaLog();
+      }
+
+      function updateSarabandaLog() {
+        const el = document.getElementById("log-sarabanda");
+        if (!el) return;
+
+        if (recordedSarabanda.length === 0) {
+          el.textContent = "// in attesa di click su Sarabanda…";
+          return;
+        }
+
+        let lines = "const pathSarabanda = [\n";
+        recordedSarabanda.forEach((p, i) => {
+          const uStr = p.u.toFixed(2);
+          const vStr = p.v.toFixed(2);
+          lines += `  { u: ${uStr}, v: ${vStr} }, // ${i + 1}\n`;
+        });
+        lines += "];";
+
+        el.textContent = lines;
+      }
+
+      // -------------------------------------------------------------
       //  GESTIONE BRANI
       // -------------------------------------------------------------
       function selectTrack(name) {
@@ -382,8 +489,8 @@
           currentPath = pathDanza;
           currentDurations = durationsDanza;
 
-          // mantengo il tuo speedFactor globale
-          speedFactor = 3.0;
+          // come avevi messo tu
+          speedFactor = 1.0;
           startHold = 0.0;
         } else {
           currentTrack = sarabandaAudio;
@@ -393,7 +500,7 @@
           currentDurations = durationsSarabanda;
 
           speedFactor = 1.0;
-          startHold = 0.5;
+          startHold = 0.0;
         }
 
         document.getElementById("status").textContent =
@@ -440,22 +547,6 @@
     </script>
   </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
