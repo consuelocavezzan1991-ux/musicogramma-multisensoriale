@@ -99,13 +99,14 @@
       let currentPath = null;
       let currentDurations = null;
 
-      let speedFactor = 3.0; // fattore globale (per Danza useremo la durata virtuale 65s)
-      let startHold = 0.0;   // fermo iniziale
+      // mantengo il valore che hai indicato
+      let speedFactor = 3.0;
+      let startHold = 0.0;
 
       // ----------------- PARAMETRI DANZA -------------------
 
-      const danzaSegmentStart = 0.0;   // da quando inizia la frase (in secondi)
-      const danzaSegmentLength = 55.0; // durata virtuale
+      const danzaSegmentStart = 0.0;
+      const danzaSegmentLength = 55.0; // tuo valore
 
       // -------------------------------------------------------------
       //  PUNTI DANZA DELLE ORE (31 figure)
@@ -145,7 +146,7 @@
       ];
 
       // -------------------------------------------------------------
-      //  DURATE RELATIVE DANZA (31 valori)
+      //  DURATE RELATIVE DANZA (31 valori) – mantengo le tue
       // -------------------------------------------------------------
       const durationsDanza = [
         1.0,  // 1
@@ -166,9 +167,9 @@
         0.4,  // 16
         0.4,  // 17
         0.7,  // 18
-        1.6,    // 19
+        1.6,  // 19
         2.5,  // 20
-        1.6,    // 21
+        1.6,  // 21
         2.5,  // 22
         0.1,  // 23
         0.2,  // 24
@@ -276,11 +277,11 @@
       }
 
       // -------------------------------------------------------------
-      //  PALLINO – DANZA (usa durata virtuale 65s + durate relative)
+      //  PALLINO – DANZA
       // -------------------------------------------------------------
       function drawPointerDanza(imgW, imgH) {
-        const t = currentTrack.currentTime(); // tempo reale audio
-        let tSeg = t - danzaSegmentStart;     // tempo relativo alla frase
+        const t = currentTrack.currentTime();
+        let tSeg = t - danzaSegmentStart;
 
         if (tSeg <= 0) {
           drawDot(pathDanza[0], imgW, imgH);
@@ -292,7 +293,6 @@
           return;
         }
 
-        // progressione 0..1 sulla durata VIRTUALE
         let progress = (tSeg / danzaSegmentLength) * speedFactor;
         if (progress < 0) progress = 0;
         if (progress > 0.999) progress = 0.999;
@@ -382,8 +382,8 @@
           currentPath = pathDanza;
           currentDurations = durationsDanza;
 
-          // micro-aggiustamenti globali se serve
-          speedFactor = 1.0;  // se tutto è un filo lento → 1.05, se veloce → 0.95
+          // mantengo il tuo speedFactor globale
+          speedFactor = 3.0;
           startHold = 0.0;
         } else {
           currentTrack = sarabandaAudio;
@@ -440,10 +440,6 @@
     </script>
   </body>
 </html>
-
-
-
-
 
 
 
