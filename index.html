@@ -19,7 +19,7 @@
       h1 {
         margin: 0;
         font-size: 1.8rem;
-        color: #0066ff; 
+        color: #0066ff; /* blu elettrico */
       }
       p.subtitle {
         margin: 5px 0 0;
@@ -100,21 +100,21 @@
       let currentPath = null;
       let currentDurations = null;
 
-      // fattori globali
+      // fattori globali (restano come li hai messi tu)
       let speedFactor = 2.8;
       let startHold = 0.0;
 
       // ----------------- PARAMETRI DANZA -------------------
       const danzaSegmentStart = 0.0;
-      const danzaSegmentLength = 55.0; 
+      const danzaSegmentLength = 55.0;
 
       // ----------------- PARAMETRI SARABANDA ---------------
       const sarabandaSegmentStart = 0.0;
-      const sarabandaSegmentLength = 45.0; 
+      const sarabandaSegmentLength = 45.0;
+      // piccolo ritardo prima che parta davvero la musica in Sarabanda
+      const sarabandaStartDelay = 0.35; // REGOLA qui se serve (+ grande = parte dopo)
 
-    
       //  PUNTI DANZA DELLE ORE (31 figure)
-     
       const pathDanza = [
         { u: 0.08, v: 0.07 }, // 1
         { u: 0.3, v: 0.07 },  // 2
@@ -149,9 +149,7 @@
         { u: 0.45, v: 0.96 }  // 31
       ];
 
-    
-      //  DURATE RELATIVE DANZA (31 valori) 
-    
+      //  DURATE RELATIVE DANZA (31 valori)
       const durationsDanza = [
         1.0,  // 1
         1.0,  // 2
@@ -186,9 +184,7 @@
         0.7   // 31
       ];
 
-  
       //  SARABANDA – PUNTI (44 figure)
-    
       const pathSarabanda = [
         { u: 0.03, v: 0.04 }, // 1
         { u: 0.19, v: 0.04 }, // 2
@@ -244,54 +240,53 @@
         { u: 0.19, v: 0.92 }  // 44
       ];
 
-     // DURATE RELATIVE SARABANDA 
-const durationsSarabanda = [
-  2.0,  // 1
-  1.0,  // 2
-  1.0,  // 3
-  1.0,  // 4
-  1.0,  // 5
-  1.0,  // 6
-  1.0,  // 7
-  0.3,  // 8
-  1.0,  // 9
-  1.0,  // 10
-  0.3,  // 11
-  1.0,  // 12
-  1.0,  // 13
-  0.3,  // 14
-  1.0,  // 15
-  1.0,  // 16
-  0.3,  // 17
-  1.0,  // 18
-  1.0,  // 19
-  0.3,  // 20
-  1.0,  // 21
-  1.0,  // 22
-  1.0,  // 23
-  1.0,  // 24
-  1.0,  // 25
-  1.0,  // 26
-  1.0,  // 27
-  1.0,  // 28
-  1.0,  // 29
-  1.0,  // 30
-  1.0,  // 31
-  1.0,  // 32
-  0.3,  // 33
-  1.0,  // 34
-  1.0,  // 35
-  0.3,  // 36
-  1.0,  // 37
-  1.0,  // 38
-  1.0,  // 39
-  1.0,  // 40
-  1.0,  // 41
-  0.3,  // 42
-  1.0,  // 43
-  1.0   // 44
-];
-
+      // DURATE RELATIVE SARABANDA (verticale come chiesto)
+      const durationsSarabanda = [
+        2.0,  // 1
+        1.0,  // 2
+        1.0,  // 3
+        1.0,  // 4
+        1.0,  // 5
+        1.0,  // 6
+        1.0,  // 7
+        0.3,  // 8
+        1.0,  // 9
+        1.0,  // 10
+        0.3,  // 11
+        1.0,  // 12
+        1.0,  // 13
+        0.3,  // 14
+        1.0,  // 15
+        1.0,  // 16
+        0.3,  // 17
+        1.0,  // 18
+        1.0,  // 19
+        0.3,  // 20
+        1.0,  // 21
+        1.0,  // 22
+        1.0,  // 23
+        1.0,  // 24
+        1.0,  // 25
+        1.0,  // 26
+        1.0,  // 27
+        1.0,  // 28
+        1.0,  // 29
+        1.0,  // 30
+        1.0,  // 31
+        1.0,  // 32
+        0.3,  // 33
+        1.0,  // 34
+        1.0,  // 35
+        0.3,  // 36
+        1.0,  // 37
+        1.0,  // 38
+        1.0,  // 39
+        1.0,  // 40
+        1.0,  // 41
+        0.3,  // 42
+        1.0,  // 43
+        1.0   // 44
+      ];
 
       // -------------------------------------------------------------
       //  PRELOAD
@@ -407,16 +402,19 @@ const durationsSarabanda = [
       }
 
       // -------------------------------------------------------------
-      //  PALLINO – SARABANDA
+      //  PALLINO – SARABANDA (con piccolo delay iniziale)
       // -------------------------------------------------------------
       function drawPointerSarabanda(imgW, imgH) {
         const t = currentTrack.currentTime();
-        let tSeg = t - sarabandaSegmentStart;
 
-        if (tSeg <= 0) {
+        // rimani fermo sulla prima figura finché non parte davvero la musica
+        if (t < sarabandaSegmentStart + sarabandaStartDelay) {
           drawDot(pathSarabanda[0], imgW, imgH);
           return;
         }
+
+        // tempo relativo alla parte utile (dopo il breve silenzio iniziale)
+        let tSeg = t - (sarabandaSegmentStart + sarabandaStartDelay);
 
         if (tSeg >= sarabandaSegmentLength) {
           drawDot(pathSarabanda[pathSarabanda.length - 1], imgW, imgH);
@@ -501,7 +499,7 @@ const durationsSarabanda = [
           currentPath = pathSarabanda;
           currentDurations = durationsSarabanda;
 
-          speedFactor = 1.0; // se Sarabanda è un po' lenta → 1.05 / 1.1 ; se veloce → 0.95
+          speedFactor = 1.0; // se Sarabanda è un po' lenta → 1.05/1.1 ; se veloce → 0.95
           startHold = 0.0;
         }
 
@@ -549,16 +547,6 @@ const durationsSarabanda = [
     </script>
   </body>
 </html>
-
-
-
-
-
-
-
-
-
-
 
 
 
