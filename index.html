@@ -19,7 +19,7 @@
       h1 {
         margin: 0;
         font-size: 1.8rem;
-        color: #0066ff; /* blu elettrico */
+        color: #0066ff; 
       }
       p.subtitle {
         margin: 5px 0 0;
@@ -100,7 +100,7 @@
       let currentPath = null;
       let currentDurations = null;
 
-      // fattori globali (restano come li hai messi tu)
+     
       let speedFactor = 2.8;
       let startHold = 0.0;
 
@@ -111,7 +111,7 @@
       // ----------------- PARAMETRI SARABANDA ---------------
       const sarabandaSegmentStart = 0.0;
       const sarabandaSegmentLength = 40.0;
-      const sarabandaStartDelay = 0.35; // REGOLA qui se serve (+ grande = parte dopo)
+      const sarabandaStartDelay = 0.35; 
 
       //  PUNTI DANZA DELLE ORE (31 figure)
       const pathDanza = [
@@ -239,7 +239,7 @@
         { u: 0.19, v: 0.92 }  // 44
       ];
 
-      // DURATE RELATIVE SARABANDA (verticale come chiesto)
+      // DURATE RELATIVE SARABANDA 
       const durationsSarabanda = [
         2.0,  // 1
         1.0,  // 2
@@ -401,7 +401,7 @@
       }
 
       // -------------------------------------------------------------
-      //  PALLINO – SARABANDA (con piccolo delay iniziale)
+      //  PALLINO – SARABANDA 
       // -------------------------------------------------------------
       function drawPointerSarabanda(imgW, imgH) {
         const t = currentTrack.currentTime();
@@ -440,7 +440,7 @@
       }
 
       // -------------------------------------------------------------
-      //  DISEGNO PALLINO (colori diversi per i due brani)
+      //  DISEGNO PALLINO 
       // -------------------------------------------------------------
       function drawDot(pos, imgW, imgH) {
         const imgX = width / 2 - imgW / 2;
@@ -498,7 +498,7 @@
           currentPath = pathSarabanda;
           currentDurations = durationsSarabanda;
 
-          speedFactor = 1.0; // se Sarabanda è un po' lenta → 1.05/1.1 ; se veloce → 0.95
+          speedFactor = 1.0; 
           startHold = 0.0;
         }
 
@@ -546,6 +546,7 @@
     </script>
   </body>
 </html>
+
 
 
 
